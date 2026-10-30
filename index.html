@@ -6,12 +6,11 @@
   <title>Свет. Чувство. История. — Портфолио</title>
   <style>
     :root {
-      --bg: #fbfbfa;
-      --card-bg: #ffffff;
+      --bg: #f4f3ee; /* Точный кремовый цвет с вашего образца */
+      --card-bg: #f4f3ee;
       --text: #1a1a1a;
       --text-muted: #666666;
       --border: #e5e5e0;
-      --card-radius: 12px;
     }
 
     [data-theme="dark"] {
@@ -41,7 +40,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 50px;
+      margin-bottom: 40px;
       border-bottom: 1px solid var(--border);
       padding-bottom: 30px;
       gap: 20px;
@@ -55,63 +54,129 @@
       line-height: 1.1;
     }
 
-    .header-controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .control-btn {
-      background: var(--card-bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 10px 18px;
-      border-radius: 30px;
-      cursor: pointer;
+    .hero-desc {
+      max-width: 340px;
       font-size: 0.9rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+      color: var(--text-muted);
+      line-height: 1.5;
     }
 
-    .control-btn:hover {
-      border-color: var(--text-muted);
+    .hero-desc span.star {
+      font-size: 1.2rem;
+      color: var(--text);
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .hero-desc a.link {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 10px;
+      border-bottom: 1px solid var(--text);
+      padding-bottom: 2px;
+    }
+
+    .subheader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .tabs-left {
+      display: flex;
+      gap: 24px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .tab-item {
+      color: var(--text-muted);
+      cursor: pointer;
+      padding-bottom: 4px;
+    }
+
+    .tab-item.active {
+      color: var(--text);
+      border-bottom: 2px solid var(--text);
+    }
+
+    .view-mode-toggle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      gap: 15px;
+    }
+
+    .view-mode-toggle span:hover { color: var(--text); }
+
+    .collection-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .collection-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filters-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .filter-chip {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .filter-chip.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
 
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 30px;
+      gap: 40px 30px;
     }
 
     .gallery.compact {
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
+      gap: 20px 16px;
     }
 
     .gallery.large {
-      grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
-      gap: 40px;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 60px 40px;
     }
 
+    /* Карточка без внешних рамок и фона */
     .card {
-      background: var(--card-bg);
-      border-radius: var(--card-radius);
-      overflow: hidden;
-      border: 1px solid var(--border);
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
     }
 
     .card-img-wrap {
@@ -120,6 +185,7 @@
       aspect-ratio: 4 / 5;
       background: var(--border);
       overflow: hidden;
+      border-radius: 8px;
     }
 
     .card img {
@@ -132,27 +198,24 @@
     }
 
     .card:hover img {
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
 
     .card-badge {
       position: absolute;
       top: 12px;
       left: 12px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       color: #fff;
       font-size: 0.75rem;
       padding: 4px 10px;
-      border-radius: 20px;
-      backdrop-filter: blur(4px);
-    }
-
-    .card-info {
-      padding: 18px 20px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
     }
 
     .card-title {
-      font-size: 1rem;
+      margin-top: 12px;
+      font-size: 0.95rem;
       font-weight: 400;
       color: var(--text);
       line-height: 1.4;
@@ -165,7 +228,7 @@
     .lightbox {
       position: fixed;
       inset: 0;
-      background: rgba(10, 10, 10, 0.92);
+      background: rgba(10, 10, 10, 0.95);
       backdrop-filter: blur(10px);
       display: none;
       flex-direction: column;
@@ -175,16 +238,13 @@
       padding: 30px;
     }
 
-    .lightbox.active {
-      display: flex;
-    }
+    .lightbox.active { display: flex; }
 
     .lightbox img {
       max-width: 90vw;
       max-height: 80vh;
-      border-radius: 8px;
+      border-radius: 4px;
       object-fit: contain;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
     .lightbox-caption {
@@ -192,7 +252,6 @@
       font-size: 1.1rem;
       color: #fff;
       text-align: center;
-      max-width: 800px;
       font-weight: 300;
     }
 
@@ -211,9 +270,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
     }
-
     .nav-btn:hover { background: rgba(255,255,255,0.25); }
     .prev-btn { left: 25px; }
     .next-btn { right: 25px; }
@@ -229,13 +286,25 @@
     }
     .close-btn:hover { color: #fff; }
 
+    .theme-toggle-fixed {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      z-index: 999;
+    }
+
     @media (max-width: 768px) {
-      body { padding: 20px 10px; }
-      header { flex-direction: column; align-items: stretch; }
-      .header-controls { justify-content: space-between; }
-      .nav-btn { width: 40px; height: 40px; font-size: 1.4rem; }
-      .prev-btn { left: 10px; }
-      .next-btn { right: 10px; }
+      body { padding: 20px 12px; }
+      header { flex-direction: column; }
     }
   </style>
 </head>
@@ -245,18 +314,42 @@
       <div>
         <h1 class="hero-title">Свет. Чувство.<br>История.</h1>
       </div>
-      <div class="header-controls">
-        <button class="control-btn" onclick="toggleGridSize()" id="grid-toggle-btn">
-          <span>🔲 Сетка</span>
-        </button>
-        <button class="control-btn" onclick="toggleTheme()" id="theme-toggle-btn">
-          <span>🌙 Ночной режим</span>
-        </button>
+      <div class="hero-desc">
+        <span class="star">✱</span><br>
+        Портреты, постановочные истории и пространство для воображения. Каждый кадр — способ почувствовать.<br>
+        <a href="#" class="link" onclick="window.scrollTo({top: 400, behavior: 'smooth'}); return false;">Смотреть работы ∨</a>
       </div>
     </header>
 
+    <div class="subheader">
+      <div class="tabs-left">
+        <span class="tab-item active">Все работы</span>
+        <span class="tab-item" style="color:var(--text-muted)">Наши фотографии</span>
+      </div>
+      <div class="view-mode-toggle">
+        <span onclick="setGrid('normal')">[ Обычные ]</span>
+        <span onclick="setGrid('large')">[ Крупные ]</span>
+        <span onclick="setGrid('compact')">[ Компактные ]</span>
+      </div>
+    </div>
+
+    <div class="collection-row">
+      <div class="collection-title">Коллекция работ</div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-chip active">Все работы</div>
+      <div class="filter-chip">Портрет</div>
+      <div class="filter-chip">Кино</div>
+      <div class="filter-chip">Fashion</div>
+      <div class="filter-chip">Lifestyle</div>
+      <div class="filter-chip">Нуар</div>
+    </div>
+
     <main class="gallery" id="gallery"></main>
   </div>
+
+  <button class="theme-toggle-fixed" onclick="toggleTheme()" id="theme-btn">🌙 Ночной режим</button>
 
   <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
     <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -269,24 +362,11 @@
   <script>
     let portfolioItems = [];
     let currentIndex = 0;
-    let gridModes = ['normal', 'large', 'compact'];
-    let currentGridIndex = 0;
 
-    const gridNames = {
-      'normal': '🔲 Обычная сетка',
-      'large': '🖼️ Крупная сетка',
-      'compact': '📱 Компактная сетка'
-    };
-
-    function toggleGridSize() {
-      currentGridIndex = (currentGridIndex + 1) % gridModes.length;
-      const mode = gridModes[currentGridIndex];
+    function setGrid(mode) {
       const gallery = document.getElementById('gallery');
-      
       gallery.className = 'gallery';
       if (mode !== 'normal') gallery.classList.add(mode);
-      
-      document.getElementById('grid-toggle-btn').innerHTML = `<span>${gridNames[mode]}</span>`;
       localStorage.setItem('portfolio_grid', mode);
     }
 
@@ -296,29 +376,21 @@
       if (isDark) {
         html.removeAttribute('data-theme');
         localStorage.setItem('portfolio_theme', 'light');
-        document.getElementById('theme-toggle-btn').innerHTML = '<span>🌙 Ночной режим</span>';
+        document.getElementById('theme-btn').textContent = '🌙 Ночной режим';
       } else {
         html.setAttribute('data-theme', 'dark');
         localStorage.setItem('portfolio_theme', 'dark');
-        document.getElementById('theme-toggle-btn').innerHTML = '<span>☀️ Дневной режим</span>';
+        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
       }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('portfolio_theme');
-      if (savedTheme === 'dark') {
+      if (localStorage.getItem('portfolio_theme') === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-toggle-btn').innerHTML = '<span>☀️ Дневной режим</span>';
+        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
       }
-
       const savedGrid = localStorage.getItem('portfolio_grid');
-      if (savedGrid && gridModes.includes(savedGrid)) {
-        currentGridIndex = gridModes.indexOf(savedGrid);
-        const gallery = document.getElementById('gallery');
-        gallery.className = 'gallery';
-        if (savedGrid !== 'normal') gallery.classList.add(savedGrid);
-        document.getElementById('grid-toggle-btn').innerHTML = `<span>${gridNames[savedGrid]}</span>`;
-      }
+      if (savedGrid) setGrid(savedGrid);
     });
 
     function openLightbox(index) {
@@ -365,9 +437,7 @@
               <span class="card-badge">${badgeNum}</span>
               <img src="${item.src}" alt="${item.title}" loading="lazy">
             </div>
-            <div class="card-info">
-              <div class="card-title">${item.title}</div>
-            </div>
+            <div class="card-title">${item.title}</div>
           `;
           gallery.appendChild(card);
         });
