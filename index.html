@@ -223,7 +223,7 @@
       </div>
     </header>
 
-    <!-- Уникальные вкладки папок -->
+    <!-- Вкладки папок (с "Все работы" в самом конце) -->
     <div class="subheader">
       <div class="tabs-left" id="folder-tabs"></div>
       <div class="view-mode-toggle">
@@ -253,7 +253,7 @@
     let allItems = [];
     let currentFilteredItems = [];
     let currentIndex = 0;
-    let activeFolder = 'all';
+    let activeFolder = '';
     let activeCategory = 'all';
 
     const categoryNames = {
@@ -368,29 +368,46 @@
         .then(data => {
           allItems = data;
 
-          // 1. Создаем вкладку "Все работы"
           const tabsContainer = document.getElementById('folder-tabs');
           tabsContainer.innerHTML = '';
+
+          // Соберим уникальные папки
+          const seenFolders = new Set();
+          const folderList = [];
+          data.forEach(item => {
+            if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
+              seenFolders.add(item.folder);
+              folderList.push({ slug: item.folder, name: item.folderName });
+            }
+          });
+
+          // Сначала рендерим обычные папки (например, Портрет/Autumn, Halloween)
+          folderList.forEach((folder, idx) => {
+            const tab = document.createElement('span');
+            tab.className = 'tab-item';
+            tab.textContent = folder.name;
+            tab.onclick = (e) => filterByFolder(folder.slug, tab);
+            tabsContainer.appendChild(tab);
+            if (idx === 0) activeFolder = folder.slug; // Сделать первую папку активной при старте
+          });
+
+          // Вкладку "Все работы" размещаем ВСЕГДА В САМОМ КОНЦЕ
           const allTab = document.createElement('span');
-          allTab.className = 'tab-item active';
+          allTab.className = 'tab-item';
           allTab.textContent = 'Все работы';
           allTab.onclick = (e) => filterByFolder('all', allTab);
           tabsContainer.appendChild(allTab);
 
-          // 2. Создаем вкладки папок без дублирования (уникальные по slug)
-          const seenFolders = new Set();
-          data.forEach(item => {
-            if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
-              seenFolders.add(item.folder);
-              const tab = document.createElement('span');
-              tab.className = 'tab-item';
-              tab.textContent = item.folderName;
-              tab.onclick = (e) => filterByFolder(item.folder, tab);
-              tabsContainer.appendChild(tab);
-            }
-          });
+          // Если папок вообще нет, то активируем "Все работы"
+          if (folderList.length === 0) {
+            activeFolder = 'all';
+            allTab.className = 'tab-item active';
+          } else {
+            // Активируем первую вкладку визуально
+            tabsContainer.children[0].classList.add('active');
+          }
 
-          // 3. Создаем фильтры жанров
+          // Жанровые фильтры
           const filtersContainer = document.getElementById('category-filters');
           filtersContainer.innerHTML = '';
           const allCatChip = document.createElement('div');
