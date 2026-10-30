@@ -3,38 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Моё Портфолио</title>
+  <title>Свет. Чувство. История. — Портфолио</title>
   <style>
-    :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #38bdf8; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px; }
-    header { max-width: 1200px; margin: 0 auto 40px; text-align: center; }
-    h1 { font-size: 2.5rem; margin-bottom: 10px; }
-    p.subtitle { color: #94a3b8; font-size: 1.1rem; }
-    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
-    .card { background: var(--card); border-radius: 14px; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; cursor: pointer; display: flex; flex-direction: column; }
-    .card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
-    .card img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top center; display: block; }
-    .card-title { padding: 14px 16px; font-size: 0.95rem; line-height: 1.4; color: #e2e8f0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .lightbox { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .lightbox.active { display: flex; }
-    .lightbox img { max-width: 90%; max-height: 82vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    .lightbox-caption { margin-top: 16px; font-size: 1.1rem; color: #f8fafc; text-align: center; max-width: 800px; }
-    .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: #fff; border: none; font-size: 2rem; padding: 12px 18px; cursor: pointer; border-radius: 50%; transition: background 0.2s; }
+    :root {
+      --bg: #fbfbfa;
+      --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+      --border: #e5e5e0;
+      --card-radius: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 60px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 50px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+
+    .control-btn:hover {
+      border-color: var(--text-muted);
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .gallery.compact {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .gallery.large {
+      grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+      gap: 40px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.03);
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-info {
+      padding: 18px 20px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(10px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 30px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      object-fit: contain;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .lightbox-caption {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #fff;
+      text-align: center;
+      max-width: 800px;
+      font-weight: 300;
+    }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      font-size: 1.8rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
     .nav-btn:hover { background: rgba(255,255,255,0.25); }
-    .prev-btn { left: 20px; }
-    .next-btn { right: 20px; }
-    .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; color: #94a3b8; cursor: pointer; background: none; border: none; }
+    .prev-btn { left: 25px; }
+    .next-btn { right: 25px; }
+    .close-btn {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      font-size: 2.2rem;
+      color: #aaa;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
     .close-btn:hover { color: #fff; }
+
+    @media (max-width: 768px) {
+      body { padding: 20px 10px; }
+      header { flex-direction: column; align-items: stretch; }
+      .header-controls { justify-content: space-between; }
+      .nav-btn { width: 40px; height: 40px; font-size: 1.4rem; }
+      .prev-btn { left: 10px; }
+      .next-btn { right: 10px; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Мои работы</h1>
-    <p class="subtitle">Галерея обновляется автоматически</p>
-  </header>
+  <div class="container">
+    <header>
+      <div>
+        <h1 class="hero-title">Свет. Чувство.<br>История.</h1>
+      </div>
+      <div class="header-controls">
+        <button class="control-btn" onclick="toggleGridSize()" id="grid-toggle-btn">
+          <span>🔲 Сетка</span>
+        </button>
+        <button class="control-btn" onclick="toggleTheme()" id="theme-toggle-btn">
+          <span>🌙 Ночной режим</span>
+        </button>
+      </div>
+    </header>
 
-  <main class="gallery" id="gallery"></main>
+    <main class="gallery" id="gallery"></main>
+  </div>
 
   <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
     <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -47,6 +269,57 @@
   <script>
     let portfolioItems = [];
     let currentIndex = 0;
+    let gridModes = ['normal', 'large', 'compact'];
+    let currentGridIndex = 0;
+
+    const gridNames = {
+      'normal': '🔲 Обычная сетка',
+      'large': '🖼️ Крупная сетка',
+      'compact': '📱 Компактная сетка'
+    };
+
+    function toggleGridSize() {
+      currentGridIndex = (currentGridIndex + 1) % gridModes.length;
+      const mode = gridModes[currentGridIndex];
+      const gallery = document.getElementById('gallery');
+      
+      gallery.className = 'gallery';
+      if (mode !== 'normal') gallery.classList.add(mode);
+      
+      document.getElementById('grid-toggle-btn').innerHTML = `<span>${gridNames[mode]}</span>`;
+      localStorage.setItem('portfolio_grid', mode);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('portfolio_theme', 'light');
+        document.getElementById('theme-toggle-btn').innerHTML = '<span>🌙 Ночной режим</span>';
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('portfolio_theme', 'dark');
+        document.getElementById('theme-toggle-btn').innerHTML = '<span>☀️ Дневной режим</span>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('portfolio_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-toggle-btn').innerHTML = '<span>☀️ Дневной режим</span>';
+      }
+
+      const savedGrid = localStorage.getItem('portfolio_grid');
+      if (savedGrid && gridModes.includes(savedGrid)) {
+        currentGridIndex = gridModes.indexOf(savedGrid);
+        const gallery = document.getElementById('gallery');
+        gallery.className = 'gallery';
+        if (savedGrid !== 'normal') gallery.classList.add(savedGrid);
+        document.getElementById('grid-toggle-btn').innerHTML = `<span>${gridNames[savedGrid]}</span>`;
+      }
+    });
 
     function openLightbox(index) {
       currentIndex = index;
@@ -86,12 +359,21 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.onclick = () => openLightbox(index);
-          card.innerHTML = `<img src="${item.src}" alt="${item.title}" loading="lazy"><div class="card-title">${item.title}</div>`;
+          const badgeNum = String(index + 1).padStart(2, '0');
+          card.innerHTML = `
+            <div class="card-img-wrap">
+              <span class="card-badge">${badgeNum}</span>
+              <img src="${item.src}" alt="${item.title}" loading="lazy">
+            </div>
+            <div class="card-info">
+              <div class="card-title">${item.title}</div>
+            </div>
+          `;
           gallery.appendChild(card);
         });
       })
       .catch(() => {
-        document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:#94a3b8;">Изображения скоро появятся...</p>';
+        document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
       });
   </script>
 </body>
