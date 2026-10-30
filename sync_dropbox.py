@@ -34,10 +34,13 @@ def sync():
     files.sort(key=lambda x: x.client_modified, reverse=True)
 
     portfolio_data = []
+    valid_filenames = set()
+
     for entry in files:
         name_without_ext = os.path.splitext(entry.name)[0]
         dest_filename = f"{name_without_ext}.webp"
         dest_path = os.path.join(IMAGES_DIR, dest_filename)
+        valid_filenames.add(dest_filename)
 
         if not os.path.exists(dest_path):
             print(f"Скачивание и сжатие: {entry.name}")
@@ -50,6 +53,12 @@ def sync():
             "src": f"images/{dest_filename}",
             "title": name_without_ext.replace("_", " ").replace("-", " ")
         })
+
+    # Удаляем из папки GitHub картинки, которых больше нет в Dropbox
+    for existing_file in os.listdir(IMAGES_DIR):
+        if existing_file not in valid_filenames:
+            os.remove(os.path.join(IMAGES_DIR, existing_file))
+            print(f"Удалено: {existing_file}")
 
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(portfolio_data, f, ensure_ascii=False, indent=2)
