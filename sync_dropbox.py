@@ -51,10 +51,13 @@ def sync():
         print(f"Ошибка при сканировании Dropbox: {e}")
         return
 
+    # Собираем реальные имена папок первого уровня внутри папки приложения
     folders_map = {}
     for entry in entries:
         if isinstance(entry, dropbox.files.FolderMetadata):
-            folders_map[entry.path_lower] = entry.name
+            parts = entry.path_lower.strip("/").split("/")
+            if len(parts) == 1: # Папка прямо в корне папки приложения Dropbox
+                folders_map[entry.path_lower] = entry.name
 
     files = [
         e for e in entries
@@ -63,14 +66,15 @@ def sync():
     files.sort(key=lambda x: x.client_modified, reverse=True)
 
     for entry in files:
-        path_parts = entry.path_lower.strip("/").split("/")
+        parts = entry.path_lower.strip("/").split("/")
         folder_slug = "all"
         folder_display_name = "Все работы"
 
-        if len(path_parts) > 2:
-            parent_folder_lower = "/" + "/".join(path_parts[2:-1])
-            if parent_folder_lower in folders_map:
-                real_name = folders_map[parent_folder_lower]
+        # Если файл лежит внутри подпапки первого уровня
+        if len(parts) > 1:
+            root_folder_path = "/" + parts[0]
+            if root_folder_path in folders_map:
+                real_name = folders_map[root_folder_path]
                 folder_slug = urllib.parse.quote(real_name.lower())
                 folder_display_name = real_name
 
