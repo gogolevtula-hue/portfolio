@@ -51,7 +51,6 @@ def sync():
         print(f"Ошибка при сканировании Dropbox: {e}")
         return
 
-    # Собираем словарь папок, чтобы знать их реальные оригинальные имена с пробелами и регистром
     folders_map = {}
     for entry in entries:
         if isinstance(entry, dropbox.files.FolderMetadata):
@@ -68,7 +67,6 @@ def sync():
         folder_slug = "all"
         folder_display_name = "Все работы"
 
-        # Если файл находится в подпапке внутри папки приложения Dropbox
         if len(path_parts) > 2:
             parent_folder_lower = "/" + "/".join(path_parts[2:-1])
             if parent_folder_lower in folders_map:
@@ -98,7 +96,6 @@ def sync():
             "folderName": folder_display_name
         })
 
-    # Удаляем неиспользуемые локальные файлы
     for existing_file in os.listdir(IMAGES_DIR):
         if existing_file not in valid_filenames:
             try:
