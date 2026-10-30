@@ -64,17 +64,20 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       flex-wrap: wrap;
       gap: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
     }
 
     .tabs-left {
       display: flex;
-      gap: 24px;
+      gap: 28px;
       font-size: 0.95rem;
       font-weight: 500;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .tab-item {
@@ -99,31 +102,6 @@
     }
 
     .view-mode-toggle span:hover { color: var(--text); }
-
-    .filters-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 40px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-    }
-
-    .filter-chip {
-      background: var(--card-bg);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 8px 18px;
-      border-radius: 24px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      white-space: nowrap;
-    }
-
-    .filter-chip.active {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-    }
 
     .gallery {
       display: grid;
@@ -223,18 +201,15 @@
       </div>
     </header>
 
-    <!-- Вкладки папок (с "Все работы" в самом конце) -->
+    <!-- Одна единая строка вкладок -->
     <div class="subheader">
-      <div class="tabs-left" id="folder-tabs"></div>
+      <div class="tabs-left" id="unified-tabs"></div>
       <div class="view-mode-toggle">
         <span onclick="setGrid('normal')">[ Обычные ]</span>
         <span onclick="setGrid('large')">[ Крупные ]</span>
         <span onclick="setGrid('compact')">[ Компактные ]</span>
       </div>
     </div>
-
-    <!-- Фильтры жанров -->
-    <div class="filters-bar" id="category-filters"></div>
 
     <main class="gallery" id="gallery"></main>
   </div>
@@ -253,17 +228,7 @@
     let allItems = [];
     let currentFilteredItems = [];
     let currentIndex = 0;
-    let activeFolder = '';
-    let activeCategory = 'all';
-
-    const categoryNames = {
-      'portrait': 'Портрет',
-      'cinema': 'Кино',
-      'fashion': 'Fashion',
-      'lifestyle': 'Lifestyle',
-      'noir': 'Нуар',
-      'surreal': 'Сюрреализм'
-    };
+    let activeTab = null;
 
     function setGrid(mode) {
       const gallery = document.getElementById('gallery');
@@ -286,25 +251,13 @@
       }
     }
 
-    function filterByFolder(folder, element) {
-      activeFolder = folder;
-      document.querySelectorAll('#folder-tabs .tab-item').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-      applyFilters();
-    }
-
-    function filterByCategory(category, element) {
-      activeCategory = category;
-      document.querySelectorAll('#category-filters .filter-chip').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-      applyFilters();
-    }
-
-    function applyFilters() {
+    function applyFilter() {
       currentFilteredItems = allItems.filter(item => {
-        const matchFolder = (activeFolder === 'all' || item.folder === activeFolder);
-        const matchCategory = (activeCategory === 'all' || item.category === activeCategory);
-        return matchFolder && matchCategory;
+        if (!activeTab) return true;
+        if (activeTab.type === 'all') return true;
+        if (activeTab.type === 'folder') return item.folder === activeTab.value;
+        if (activeTab.type === 'category') return item.category === activeTab.value;
+        return true;
       });
       renderGallery(currentFilteredItems);
     }
@@ -367,67 +320,50 @@
         .then(res => res.json())
         .then(data => {
           allItems = data;
-
-          const tabsContainer = document.getElementById('folder-tabs');
+          const tabsContainer = document.getElementById('unified-tabs');
           tabsContainer.innerHTML = '';
 
-          // Соберим уникальные папки
+          const tabItems = [];
+
+          // 1. Добавляем вкладку "Портрет", если есть такие работы
+          const hasPortrait = data.some(item => item.category === 'portrait');
+          if (hasPortrait) {
+            tabItems.push({ name: 'Портрет', type: 'category', value: 'portrait' });
+          }
+
+          // 2. Добавляем уникальные папки из Dropbox (Halloween, Autumn photoshoot и т.д.)
           const seenFolders = new Set();
-          const folderList = [];
           data.forEach(item => {
             if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
               seenFolders.add(item.folder);
-              folderList.push({ slug: item.folder, name: item.folderName });
+              tabItems.push({ name: item.folderName, type: 'folder', value: item.folder });
             }
           });
 
-          // Сначала рендерим обычные папки (например, Портрет/Autumn, Halloween)
-          folderList.forEach((folder, idx) => {
+          // 3. Вкладка "Все работы" ВСЕГДА В САМОМ КОНЦЕ
+          tabItems.push({ name: 'Все работы', type: 'all', value: 'all' });
+
+          // Создаем элементы вкладок на странице
+          tabItems.forEach((tabObj, idx) => {
             const tab = document.createElement('span');
             tab.className = 'tab-item';
-            tab.textContent = folder.name;
-            tab.onclick = (e) => filterByFolder(folder.slug, tab);
+            tab.textContent = tabObj.name;
+            tab.onclick = () => {
+              document.querySelectorAll('#unified-tabs .tab-item').forEach(el => el.classList.remove('active'));
+              tab.classList.add('active');
+              activeTab = tabObj;
+              applyFilter();
+            };
             tabsContainer.appendChild(tab);
-            if (idx === 0) activeFolder = folder.slug; // Сделать первую папку активной при старте
-          });
 
-          // Вкладку "Все работы" размещаем ВСЕГДА В САМОМ КОНЦЕ
-          const allTab = document.createElement('span');
-          allTab.className = 'tab-item';
-          allTab.textContent = 'Все работы';
-          allTab.onclick = (e) => filterByFolder('all', allTab);
-          tabsContainer.appendChild(allTab);
-
-          // Если папок вообще нет, то активируем "Все работы"
-          if (folderList.length === 0) {
-            activeFolder = 'all';
-            allTab.className = 'tab-item active';
-          } else {
-            // Активируем первую вкладку визуально
-            tabsContainer.children[0].classList.add('active');
-          }
-
-          // Жанровые фильтры
-          const filtersContainer = document.getElementById('category-filters');
-          filtersContainer.innerHTML = '';
-          const allCatChip = document.createElement('div');
-          allCatChip.className = 'filter-chip active';
-          allCatChip.textContent = 'Все жанры';
-          allCatChip.onclick = (e) => filterByCategory('all', allCatChip);
-          filtersContainer.appendChild(allCatChip);
-
-          const presentCategories = [...new Set(data.map(item => item.category).filter(c => c !== 'other'))];
-          presentCategories.forEach(catKey => {
-            if (categoryNames[catKey]) {
-              const chip = document.createElement('div');
-              chip.className = 'filter-chip';
-              chip.textContent = categoryNames[catKey];
-              chip.onclick = (e) => filterByCategory(catKey, chip);
-              filtersContainer.appendChild(chip);
+            // Сайт открывается на первой вкладке (Портрет или первой папке)
+            if (idx === 0) {
+              tab.classList.add('active');
+              activeTab = tabObj;
             }
           });
 
-          applyFilters();
+          applyFilter();
         })
         .catch(() => {
           document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
