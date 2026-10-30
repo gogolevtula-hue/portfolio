@@ -3,6 +3,7 @@ import json
 import dropbox
 from PIL import Image
 import io
+import urllib.parse
 
 APP_KEY = os.environ["DROPBOX_APP_KEY"]
 APP_SECRET = os.environ["DROPBOX_APP_SECRET"]
@@ -37,7 +38,6 @@ def get_category_from_name(filename):
     return 'other'
 
 def sync():
-    # Рекурсивно сканируем все папки и подпапки в Dropbox
     portfolio_data = []
     valid_filenames = set()
 
@@ -51,6 +51,12 @@ def sync():
         print(f"Ошибка при сканировании Dropbox: {e}")
         return
 
+    # Собираем словарь папок, чтобы знать их реальные оригинальные имена с пробелами и регистром
+    folders_map = {}
+    for entry in entries:
+        if isinstance(entry, dropbox.files.FolderMetadata):
+            folders_map[entry.path_lower] = entry.name
+
     files = [
         e for e in entries
         if isinstance(e, dropbox.files.FileMetadata) and e.name.lower().endswith(VALID_EXT)
@@ -58,11 +64,17 @@ def sync():
     files.sort(key=lambda x: x.client_modified, reverse=True)
 
     for entry in files:
-        # Определяем папку в Dropbox как категорию (например, "фотосессия")
         path_parts = entry.path_lower.strip("/").split("/")
-        folder_category = "all"
-        if len(path_parts) > 2: # Если файл лежит внутри подпапки (например, Apps/App/photosession/file.jpg)
-            folder_category = path_parts[-2]
+        folder_slug = "all"
+        folder_display_name = "Все работы"
+
+        # Если файл находится в подпапке внутри папки приложения Dropbox
+        if len(path_parts) > 2:
+            parent_folder_lower = "/" + "/".join(path_parts[2:-1])
+            if parent_folder_lower in folders_map:
+                real_name = folders_map[parent_folder_lower]
+                folder_slug = urllib.parse.quote(real_name.lower())
+                folder_display_name = real_name
 
         name_without_ext = os.path.splitext(entry.name)[0]
         dest_filename = f"{abs(hash(entry.path_lower))}_{name_without_ext}.webp"
@@ -76,17 +88,17 @@ def sync():
                 img.thumbnail((1920, 1920))
                 img.save(dest_path, "WEBP", quality=85)
 
-        # Категория по имени файла или по названию папки
         tag = get_category_from_name(entry.name)
         
         portfolio_data.append({
             "src": f"images/{dest_filename}",
             "title": name_without_ext.replace("_", " ").replace("-", " "),
             "category": tag,
-            "folder": folder_category
+            "folder": folder_slug,
+            "folderName": folder_display_name
         })
 
-    # Удаляем неиспользуемые локальные картинки
+    # Удаляем неиспользуемые локальные файлы
     for existing_file in os.listdir(IMAGES_DIR):
         if existing_file not in valid_filenames:
             try:
