@@ -223,7 +223,7 @@
       </div>
     </header>
 
-    <!-- Динамические вкладки папок -->
+    <!-- Уникальные вкладки папок -->
     <div class="subheader">
       <div class="tabs-left" id="folder-tabs"></div>
       <div class="view-mode-toggle">
@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <!-- Динамические фильтры жанров -->
+    <!-- Фильтры жанров -->
     <div class="filters-bar" id="category-filters"></div>
 
     <main class="gallery" id="gallery"></main>
@@ -368,25 +368,31 @@
         .then(data => {
           allItems = data;
 
-          // 1. Создаем вкладки папок ТОЛЬКО если они есть в данных
+          // 1. Создаем вкладку "Все работы"
           const tabsContainer = document.getElementById('folder-tabs');
+          tabsContainer.innerHTML = '';
           const allTab = document.createElement('span');
           allTab.className = 'tab-item active';
           allTab.textContent = 'Все работы';
           allTab.onclick = (e) => filterByFolder('all', allTab);
           tabsContainer.appendChild(allTab);
 
-          const folders = [...new Set(data.map(item => ({ slug: item.folder, name: item.folderName })).filter(f => f.slug !== 'all'))];
-          folders.forEach(folder => {
-            const tab = document.createElement('span');
-            tab.className = 'tab-item';
-            tab.textContent = folder.name;
-            tab.onclick = (e) => filterByFolder(folder.slug, tab);
-            tabsContainer.appendChild(tab);
+          // 2. Создаем вкладки папок без дублирования (уникальные по slug)
+          const seenFolders = new Set();
+          data.forEach(item => {
+            if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
+              seenFolders.add(item.folder);
+              const tab = document.createElement('span');
+              tab.className = 'tab-item';
+              tab.textContent = item.folderName;
+              tab.onclick = (e) => filterByFolder(item.folder, tab);
+              tabsContainer.appendChild(tab);
+            }
           });
 
-          // 2. Создаем фильтры жанров ТОЛЬКО для тех категорий, которые реально присутствуют
+          // 3. Создаем фильтры жанров
           const filtersContainer = document.getElementById('category-filters');
+          filtersContainer.innerHTML = '';
           const allCatChip = document.createElement('div');
           allCatChip.className = 'filter-chip active';
           allCatChip.textContent = 'Все жанры';
