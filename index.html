@@ -6,7 +6,7 @@
   <title>Свет. Чувство. История. — Портфолио</title>
   <style>
     :root {
-      --bg: #f4f3ee; /* Точный кремовый цвет с вашего образца */
+      --bg: #f4f3ee;
       --card-bg: #f4f3ee;
       --text: #1a1a1a;
       --text-muted: #666666;
@@ -31,10 +31,7 @@
       min-height: 100vh;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1400px; margin: 0 auto; }
 
     header {
       display: flex;
@@ -61,23 +58,8 @@
       line-height: 1.5;
     }
 
-    .hero-desc span.star {
-      font-size: 1.2rem;
-      color: var(--text);
-      display: inline-block;
-      margin-bottom: 4px;
-    }
-
-    .hero-desc a.link {
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 500;
-      display: inline-block;
-      margin-top: 10px;
-      border-bottom: 1px solid var(--text);
-      padding-bottom: 2px;
-    }
-
+    .hero-desc span.star { font-size: 1.2rem; color: var(--text); display: inline-block; margin-bottom: 4px; }
+    
     .subheader {
       display: flex;
       justify-content: space-between;
@@ -92,12 +74,14 @@
       gap: 24px;
       font-size: 0.95rem;
       font-weight: 500;
+      flex-wrap: wrap;
     }
 
     .tab-item {
       color: var(--text-muted);
       cursor: pointer;
       padding-bottom: 4px;
+      text-transform: capitalize;
     }
 
     .tab-item.active {
@@ -116,20 +100,6 @@
     }
 
     .view-mode-toggle span:hover { color: var(--text); }
-
-    .collection-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .collection-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
 
     .filters-bar {
       display: flex;
@@ -162,22 +132,10 @@
       gap: 40px 30px;
     }
 
-    .gallery.compact {
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px 16px;
-    }
+    .gallery.compact { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px 16px; }
+    .gallery.large { grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 60px 40px; }
 
-    .gallery.large {
-      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
-      gap: 60px 40px;
-    }
-
-    /* Карточка без внешних рамок и фона */
-    .card {
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-    }
+    .card { cursor: pointer; display: flex; flex-direction: column; }
 
     .card-img-wrap {
       position: relative;
@@ -197,9 +155,7 @@
       transition: transform 0.5s ease;
     }
 
-    .card:hover img {
-      transform: scale(1.02);
-    }
+    .card:hover img { transform: scale(1.02); }
 
     .card-badge {
       position: absolute;
@@ -210,13 +166,11 @@
       font-size: 0.75rem;
       padding: 4px 10px;
       border-radius: 4px;
-      letter-spacing: 0.05em;
     }
 
     .card-title {
       margin-top: 12px;
       font-size: 0.95rem;
-      font-weight: 400;
       color: var(--text);
       line-height: 1.4;
       display: -webkit-box;
@@ -237,74 +191,24 @@
       z-index: 1000;
       padding: 30px;
     }
-
     .lightbox.active { display: flex; }
-
-    .lightbox img {
-      max-width: 90vw;
-      max-height: 80vh;
-      border-radius: 4px;
-      object-fit: contain;
-    }
-
-    .lightbox-caption {
-      margin-top: 20px;
-      font-size: 1.1rem;
-      color: #fff;
-      text-align: center;
-      font-weight: 300;
-    }
+    .lightbox img { max-width: 90vw; max-height: 80vh; border-radius: 4px; object-fit: contain; }
+    .lightbox-caption { margin-top: 20px; font-size: 1.1rem; color: #fff; text-align: center; }
 
     .nav-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: none;
-      font-size: 1.8rem;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.1); color: #fff; border: none;
+      font-size: 1.8rem; width: 50px; height: 50px; border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
-    .nav-btn:hover { background: rgba(255,255,255,0.25); }
-    .prev-btn { left: 25px; }
-    .next-btn { right: 25px; }
-    .close-btn {
-      position: absolute;
-      top: 25px;
-      right: 30px;
-      font-size: 2.2rem;
-      color: #aaa;
-      cursor: pointer;
-      background: none;
-      border: none;
-    }
-    .close-btn:hover { color: #fff; }
+    .prev-btn { left: 25px; } .next-btn { right: 25px; }
+    .close-btn { position: absolute; top: 25px; right: 30px; font-size: 2.2rem; color: #aaa; cursor: pointer; background: none; border: none; }
 
     .theme-toggle-fixed {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      padding: 12px 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      z-index: 999;
-    }
-
-    @media (max-width: 768px) {
-      body { padding: 20px 12px; }
-      header { flex-direction: column; }
+      position: fixed; bottom: 25px; right: 25px;
+      background: var(--text); color: var(--bg); border: none;
+      padding: 12px 20px; border-radius: 30px; cursor: pointer; font-weight: 500;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 999;
     }
   </style>
 </head>
@@ -316,15 +220,14 @@
       </div>
       <div class="hero-desc">
         <span class="star">✱</span><br>
-        Портреты, постановочные истории и пространство для воображения. Каждый кадр — способ почувствовать.<br>
-        <a href="#" class="link" onclick="window.scrollTo({top: 400, behavior: 'smooth'}); return false;">Смотреть работы ∨</a>
+        Портреты, постановочные истории и пространство для воображения. Каждый кадр — способ почувствовать.
       </div>
     </header>
 
+    <!-- Вкладки папок из Dropbox (например, "Все работы", "Фотосессия") -->
     <div class="subheader">
-      <div class="tabs-left">
-        <span class="tab-item active">Все работы</span>
-        <span class="tab-item" style="color:var(--text-muted)">Наши фотографии</span>
+      <div class="tabs-left" id="folder-tabs">
+        <span class="tab-item active" onclick="filterByFolder('all', this)">Все работы</span>
       </div>
       <div class="view-mode-toggle">
         <span onclick="setGrid('normal')">[ Обычные ]</span>
@@ -333,17 +236,15 @@
       </div>
     </div>
 
-    <div class="collection-row">
-      <div class="collection-title">Коллекция работ</div>
-    </div>
-
-    <div class="filters-bar">
-      <div class="filter-chip active">Все работы</div>
-      <div class="filter-chip">Портрет</div>
-      <div class="filter-chip">Кино</div>
-      <div class="filter-chip">Fashion</div>
-      <div class="filter-chip">Lifestyle</div>
-      <div class="filter-chip">Нуар</div>
+    <!-- Фильтры по жанрам (Портрет, Кино, Сюрреализм и т.д.) -->
+    <div class="filters-bar" id="category-filters">
+      <div class="filter-chip active" onclick="filterByCategory('all', this)">Все жанры</div>
+      <div class="filter-chip" onclick="filterByCategory('portrait', this)">Портрет</div>
+      <div class="filter-chip" onclick="filterByCategory('cinema', this)">Кино</div>
+      <div class="filter-chip" onclick="filterByCategory('surreal', this)">Сюрреализм</div>
+      <div class="filter-chip" onclick="filterByCategory('fashion', this)">Fashion</div>
+      <div class="filter-chip" onclick="filterByCategory('lifestyle', this)">Lifestyle</div>
+      <div class="filter-chip" onclick="filterByCategory('noir', this)">Нуар</div>
     </div>
 
     <main class="gallery" id="gallery"></main>
@@ -360,8 +261,11 @@
   </div>
 
   <script>
-    let portfolioItems = [];
+    let allItems = [];
+    let currentFilteredItems = [];
     let currentIndex = 0;
+    let activeFolder = 'all';
+    let activeCategory = 'all';
 
     function setGrid(mode) {
       const gallery = document.getElementById('gallery');
@@ -384,32 +288,64 @@
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('portfolio_theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
+    function filterByFolder(folder, element) {
+      activeFolder = folder;
+      document.querySelectorAll('#folder-tabs .tab-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      applyFilters();
+    }
+
+    function filterByCategory(category, element) {
+      activeCategory = category;
+      document.querySelectorAll('#category-filters .filter-chip').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      currentFilteredItems = allItems.filter(item => {
+        const matchFolder = (activeFolder === 'all' || item.folder === activeFolder);
+        const matchCategory = (activeCategory === 'all' || item.category === activeCategory);
+        return matchFolder && matchCategory;
+      });
+      renderGallery(currentFilteredItems);
+    }
+
+    function renderGallery(items) {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      if (!items.length) {
+        gallery.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">В этой категории пока нет работ.</p>';
+        return;
       }
-      const savedGrid = localStorage.getItem('portfolio_grid');
-      if (savedGrid) setGrid(savedGrid);
-    });
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => openLightbox(index);
+        const badgeNum = String(index + 1).padStart(2, '0');
+        card.innerHTML = `
+          <div class="card-img-wrap">
+            <span class="card-badge">${badgeNum}</span>
+            <img src="${item.src}" alt="${item.title}" loading="lazy">
+          </div>
+          <div class="card-title">${item.title}</div>
+        `;
+        gallery.appendChild(card);
+      });
+    }
 
     function openLightbox(index) {
       currentIndex = index;
-      updateLightbox();
+      const item = currentFilteredItems[currentIndex];
+      document.getElementById('lightbox-img').src = item.src;
+      document.getElementById('lightbox-caption').textContent = item.title;
       document.getElementById('lightbox').classList.add('active');
     }
 
-    function closeLightbox() {
-      document.getElementById('lightbox').classList.remove('active');
-    }
-
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
     function changeImage(step) {
-      currentIndex = (currentIndex + step + portfolioItems.length) % portfolioItems.length;
-      updateLightbox();
-    }
-
-    function updateLightbox() {
-      const item = portfolioItems[currentIndex];
+      currentIndex = (currentIndex + step + currentFilteredItems.length) % currentFilteredItems.length;
+      const item = currentFilteredItems[currentIndex];
       document.getElementById('lightbox-img').src = item.src;
       document.getElementById('lightbox-caption').textContent = item.title;
     }
@@ -421,30 +357,37 @@
       if (e.key === 'ArrowRight') changeImage(1);
     });
 
-    fetch('images.json?t=' + Date.now())
-      .then(res => res.json())
-      .then(images => {
-        portfolioItems = images;
-        const gallery = document.getElementById('gallery');
-        if (!images.length) throw new Error();
-        images.forEach((item, index) => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.onclick = () => openLightbox(index);
-          const badgeNum = String(index + 1).padStart(2, '0');
-          card.innerHTML = `
-            <div class="card-img-wrap">
-              <span class="card-badge">${badgeNum}</span>
-              <img src="${item.src}" alt="${item.title}" loading="lazy">
-            </div>
-            <div class="card-title">${item.title}</div>
-          `;
-          gallery.appendChild(card);
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('portfolio_theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
+      }
+      const savedGrid = localStorage.getItem('portfolio_grid');
+      if (savedGrid) setGrid(savedGrid);
+
+      fetch('images.json?t=' + Date.now())
+        .then(res => res.json())
+        .then(data => {
+          allItems = data;
+          
+          // Динамически находим все уникальные подпапки из Dropbox (например, "фотосессия")
+          const folders = [...new Set(data.map(item => item.folder).filter(f => f !== 'all'))];
+          const tabsContainer = document.getElementById('folder-tabs');
+          
+          folders.forEach(folderName => {
+            const tab = document.createElement('span');
+            tab.className = 'tab-item';
+            tab.textContent = folderName.charAt(0).toUpperCase() + folderName.slice(1);
+            tab.onclick = (e) => filterByFolder(folderName, tab);
+            tabsContainer.appendChild(tab);
+          });
+
+          applyFilters();
+        })
+        .catch(() => {
+          document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
         });
-      })
-      .catch(() => {
-        document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
-      });
+    });
   </script>
 </body>
 </html>
