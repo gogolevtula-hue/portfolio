@@ -81,7 +81,6 @@
       color: var(--text-muted);
       cursor: pointer;
       padding-bottom: 4px;
-      text-transform: capitalize;
     }
 
     .tab-item.active {
@@ -224,11 +223,9 @@
       </div>
     </header>
 
-    <!-- Вкладки папок из Dropbox (например, "Все работы", "Фотосессия") -->
+    <!-- Динамические вкладки папок -->
     <div class="subheader">
-      <div class="tabs-left" id="folder-tabs">
-        <span class="tab-item active" onclick="filterByFolder('all', this)">Все работы</span>
-      </div>
+      <div class="tabs-left" id="folder-tabs"></div>
       <div class="view-mode-toggle">
         <span onclick="setGrid('normal')">[ Обычные ]</span>
         <span onclick="setGrid('large')">[ Крупные ]</span>
@@ -236,16 +233,8 @@
       </div>
     </div>
 
-    <!-- Фильтры по жанрам (Портрет, Кино, Сюрреализм и т.д.) -->
-    <div class="filters-bar" id="category-filters">
-      <div class="filter-chip active" onclick="filterByCategory('all', this)">Все жанры</div>
-      <div class="filter-chip" onclick="filterByCategory('portrait', this)">Портрет</div>
-      <div class="filter-chip" onclick="filterByCategory('cinema', this)">Кино</div>
-      <div class="filter-chip" onclick="filterByCategory('surreal', this)">Сюрреализм</div>
-      <div class="filter-chip" onclick="filterByCategory('fashion', this)">Fashion</div>
-      <div class="filter-chip" onclick="filterByCategory('lifestyle', this)">Lifestyle</div>
-      <div class="filter-chip" onclick="filterByCategory('noir', this)">Нуар</div>
-    </div>
+    <!-- Динамические фильтры жанров -->
+    <div class="filters-bar" id="category-filters"></div>
 
     <main class="gallery" id="gallery"></main>
   </div>
@@ -266,6 +255,15 @@
     let currentIndex = 0;
     let activeFolder = 'all';
     let activeCategory = 'all';
+
+    const categoryNames = {
+      'portrait': 'Портрет',
+      'cinema': 'Кино',
+      'fashion': 'Fashion',
+      'lifestyle': 'Lifestyle',
+      'noir': 'Нуар',
+      'surreal': 'Сюрреализм'
+    };
 
     function setGrid(mode) {
       const gallery = document.getElementById('gallery');
@@ -369,17 +367,41 @@
         .then(res => res.json())
         .then(data => {
           allItems = data;
-          
-          // Динамически находим все уникальные подпапки из Dropbox (например, "фотосессия")
-          const folders = [...new Set(data.map(item => item.folder).filter(f => f !== 'all'))];
+
+          // 1. Создаем вкладки папок ТОЛЬКО если они есть в данных
           const tabsContainer = document.getElementById('folder-tabs');
-          
-          folders.forEach(folderName => {
+          const allTab = document.createElement('span');
+          allTab.className = 'tab-item active';
+          allTab.textContent = 'Все работы';
+          allTab.onclick = (e) => filterByFolder('all', allTab);
+          tabsContainer.appendChild(allTab);
+
+          const folders = [...new Set(data.map(item => ({ slug: item.folder, name: item.folderName })).filter(f => f.slug !== 'all'))];
+          folders.forEach(folder => {
             const tab = document.createElement('span');
             tab.className = 'tab-item';
-            tab.textContent = folderName.charAt(0).toUpperCase() + folderName.slice(1);
-            tab.onclick = (e) => filterByFolder(folderName, tab);
+            tab.textContent = folder.name;
+            tab.onclick = (e) => filterByFolder(folder.slug, tab);
             tabsContainer.appendChild(tab);
+          });
+
+          // 2. Создаем фильтры жанров ТОЛЬКО для тех категорий, которые реально присутствуют
+          const filtersContainer = document.getElementById('category-filters');
+          const allCatChip = document.createElement('div');
+          allCatChip.className = 'filter-chip active';
+          allCatChip.textContent = 'Все жанры';
+          allCatChip.onclick = (e) => filterByCategory('all', allCatChip);
+          filtersContainer.appendChild(allCatChip);
+
+          const presentCategories = [...new Set(data.map(item => item.category).filter(c => c !== 'other'))];
+          presentCategories.forEach(catKey => {
+            if (categoryNames[catKey]) {
+              const chip = document.createElement('div');
+              chip.className = 'filter-chip';
+              chip.textContent = categoryNames[catKey];
+              chip.onclick = (e) => filterByCategory(catKey, chip);
+              filtersContainer.appendChild(chip);
+            }
           });
 
           applyFilters();
