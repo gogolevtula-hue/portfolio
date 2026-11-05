@@ -101,37 +101,42 @@
 
     .container { max-width: 1440px; margin: 0 auto; position: relative; z-index: 1; }
 
-    /* Верхняя шапка с вашим полным логотипом в углу */
+    /* Верхняя шапка с логотипом БЕЗ рамки */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 44px;
+      margin-bottom: 36px;
     }
 
     .logo-banner-link {
       display: inline-flex;
       align-items: center;
       text-decoration: none;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #130421;
-      border: 1.5px solid rgba(217, 70, 239, 0.45);
-      box-shadow: 0 8px 30px rgba(217, 70, 239, 0.28);
-    }
-
-    .logo-banner-link:hover {
-      border-color: #f43f5e;
-      box-shadow: 0 10px 36px rgba(217, 70, 239, 0.45);
-      transform: translateY(-2px);
+      background: transparent;
+      border: none;
+      box-shadow: none;
     }
 
     .logo-banner-img {
       display: block;
-      height: 135px;
+      height: 140px;
       width: auto;
       max-width: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      filter: drop-shadow(0 4px 18px rgba(217, 70, 239, 0.35));
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    :root:not([data-theme="dark"]) .logo-banner-img {
+      filter: drop-shadow(0 2px 6px rgba(31, 9, 41, 0.55)) drop-shadow(0 4px 16px rgba(192, 38, 211, 0.35));
+    }
+
+    .logo-banner-link:hover .logo-banner-img {
+      transform: scale(1.02);
     }
 
     /* Главный заголовок */
@@ -324,48 +329,34 @@
     .prev-btn { left: 25px; } .next-btn { right: 25px; }
     .close-btn { position: absolute; top: 25px; right: 30px; font-size: 2.2rem; color: #cbd5e1; cursor: pointer; background: none; border: none; }
 
-    /* Двойной переключатель темы (Дневной / Ночной) */
-    .theme-switcher {
+    /* Одиночная компактная кнопка переключения темы */
+    .theme-toggle-fixed {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: inline-flex;
-      background: var(--surface);
-      backdrop-filter: blur(14px);
-      padding: 5px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.25);
-      z-index: 999;
-      gap: 4px;
-    }
-
-    .theme-mode-btn {
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .theme-mode-btn:hover {
-      color: var(--text);
-    }
-
-    .theme-mode-btn.active {
+      bottom: 25px;
+      right: 25px;
       background: var(--accent);
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(217, 70, 239, 0.4);
+      color: var(--accent-text);
+      border: none;
+      padding: 12px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      box-shadow: 0 8px 24px rgba(217, 70, 239, 0.35);
+      z-index: 999;
+      letter-spacing: 0.03em;
+    }
+
+    .theme-toggle-fixed:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(217, 70, 239, 0.5);
     }
 
     /* Кнопка наверх */
     .scroll-top-btn {
       position: fixed;
-      bottom: 84px;
-      right: 24px;
+      bottom: 82px;
+      right: 25px;
       width: 48px;
       height: 48px;
       border-radius: 50%;
@@ -391,7 +382,7 @@
 
     @media (max-width: 768px) {
       body { padding: 24px 18px 80px; }
-      .logo-banner-img { height: 95px; }
+      .logo-banner-img { height: 100px; }
       .gallery.large { grid-template-columns: 1fr; }
     }
   </style>
@@ -408,6 +399,7 @@
     <div class="top-bar">
       <a href="#" class="logo-banner-link" title="Дмитрий Гоголев — Нейрохудожник">
         <img
+          id="site-logo"
           src="Gemini_Generated_Image_di3q1zdi3q1zdi3q.jpg"
           onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='logo.png';}"
           alt="Дмитрий Гоголев — Нейрохудожник"
@@ -434,12 +426,7 @@
   </div>
 
   <button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
-
-  <!-- Понятный переключатель тем: какая кнопка нажата — тот режим и включён -->
-  <div class="theme-switcher">
-    <button class="theme-mode-btn" id="btn-light" onclick="setTheme('light')">☀️ Дневной</button>
-    <button class="theme-mode-btn active" id="btn-dark" onclick="setTheme('dark')">🌙 Ночной</button>
-  </div>
+  <button class="theme-toggle-fixed" id="theme-btn" onclick="toggleTheme()">🌙 Ночной режим</button>
 
   <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
     <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -454,6 +441,88 @@
     let currentFilteredItems = [];
     let currentIndex = 0;
     let activeTab = null;
+
+    // Автоматическое удаление тёмного фона у логотипа и обрезка пустых полей
+    function makeLogoTransparent() {
+      const img = document.getElementById('site-logo');
+      if (!img) return;
+
+      const process = () => {
+        if (img.dataset.processed) return;
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const w = img.naturalWidth;
+          const h = img.naturalHeight;
+          if (!w || !h) return;
+
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0);
+
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const d = imgData.data;
+
+          // Определяем цвет фона по угловому пикселю
+          const bgR = d[0], bgG = d[1], bgB = d[2];
+
+          let minX = w, minY = h, maxX = 0, maxY = 0;
+
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const idx = (y * w + x) * 4;
+              const r = d[idx], g = d[idx + 1], b = d[idx + 2];
+
+              const dist = Math.hypot(r - bgR, g - bgG, b - bgB);
+              const maxChannel = Math.max(r, g, b);
+
+              if (dist < 28 && maxChannel < 65) {
+                d[idx + 3] = 0;
+              } else if (dist < 85) {
+                const alpha = Math.min(1, (dist - 28) / 57);
+                d[idx + 3] = Math.round(alpha * 255);
+              }
+
+              if (d[idx + 3] > 15) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+
+          // Аккуратно кадрируем лишние пустые края вокруг логотипа
+          const pad = 16;
+          minX = Math.max(0, minX - pad);
+          minY = Math.max(0, minY - pad);
+          maxX = Math.min(w - 1, maxX + pad);
+          maxY = Math.min(h - 1, maxY + pad);
+
+          const cropW = maxX - minX + 1;
+          const cropH = maxY - minY + 1;
+
+          if (cropW > 0 && cropH > 0) {
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = cropW;
+            outCanvas.height = cropH;
+            outCanvas.getContext('2d').drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+            img.dataset.processed = '1';
+            img.src = outCanvas.toDataURL('image/png');
+          }
+        } catch (e) {
+          // Если браузер открыт локально без сервера, оставляем как есть
+        }
+      };
+
+      if (img.complete && img.naturalWidth) {
+        process();
+      } else {
+        img.addEventListener('load', process, { once: true });
+      }
+    }
 
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -478,22 +547,23 @@
       localStorage.setItem('portfolio_grid', mode);
     }
 
-    function setTheme(mode) {
+    function applyTheme(mode) {
       const html = document.documentElement;
-      const btnLight = document.getElementById('btn-light');
-      const btnDark = document.getElementById('btn-dark');
-
+      const btn = document.getElementById('theme-btn');
       if (mode === 'light') {
         html.removeAttribute('data-theme');
-        btnLight.classList.add('active');
-        btnDark.classList.remove('active');
+        btn.textContent = '☀️ Дневной режим';
         localStorage.setItem('portfolio_theme', 'light');
       } else {
         html.setAttribute('data-theme', 'dark');
-        btnDark.classList.add('active');
-        btnLight.classList.remove('active');
+        btn.textContent = '🌙 Ночной режим';
         localStorage.setItem('portfolio_theme', 'dark');
       }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      applyTheme(isDark ? 'light' : 'dark');
     }
 
     function applyFilter() {
@@ -632,10 +702,11 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      makeLogoTransparent();
       initNeuralCanvas();
 
       const savedTheme = localStorage.getItem('portfolio_theme') || 'dark';
-      setTheme(savedTheme);
+      applyTheme(savedTheme);
 
       const savedGrid = localStorage.getItem('portfolio_grid');
       if (savedGrid) setGrid(savedGrid);
