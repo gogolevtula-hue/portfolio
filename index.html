@@ -1,63 +1,66 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Дмитрий Гоголев — Нейрохудожник</title>
   <style>
-    /* Дневной режим (светлый по умолчанию) */
+    /* Дневной режим (светлая тема) */
     :root {
-      --bg: #faf6fc;
-      --surface: rgba(255, 255, 255, 0.75);
+      --bg: #f8f4fb;
+      --surface: rgba(255, 255, 255, 0.82);
       --card-bg: #ffffff;
-      --text: #21092a;
-      --text-muted: #6e4e7e;
-      --border: rgba(217, 70, 239, 0.14);
-      --accent: linear-gradient(135deg, #b01a8d 0%, #6366f1 100%);
-      --accent-solid: #b01a8d;
+      --text: #1f0929;
+      --text-muted: #6b4c7b;
+      --border: rgba(192, 38, 211, 0.18);
+      --accent: linear-gradient(135deg, #d946ef 0%, #9333ea 50%, #4f46e5 100%);
+      --accent-solid: #c026d3;
       --accent-text: #ffffff;
-      /* Тончайшие пастельные разводы для светлого фона */
-      --glow-1: rgba(217, 70, 239, 0.05);
-      --glow-2: rgba(162, 28, 175, 0.04);
-      --glow-3: rgba(99, 102, 241, 0.04);
-      --grid-line: rgba(217, 70, 239, 0.03);
-      --node-color: 139, 92, 246;
-      --node-opacity: 0.16;
+      --glow-1: rgba(217, 70, 239, 0.08);
+      --glow-2: rgba(147, 51, 234, 0.06);
+      --glow-3: rgba(79, 70, 229, 0.05);
+      --grid-line: rgba(192, 38, 211, 0.04);
+      --node-color: 168, 85, 247;
+      --node-opacity: 0.22;
     }
 
-    /* Ночной режим (темный) */
+    /* Ночной режим (тёмная киберпанк-фуксия тема) */
     [data-theme="dark"] {
-      --bg: #04010a;
-      --surface: rgba(22, 11, 41, 0.55);
-      --card-bg: rgba(30, 15, 54, 0.85);
+      --bg: #070210;
+      --surface: rgba(24, 10, 44, 0.65);
+      --card-bg: rgba(32, 14, 58, 0.88);
       --text: #fdfaff;
-      --text-muted: #bd9ec7;
-      --border: rgba(244, 63, 94, 0.22);
+      --text-muted: #cfaee0;
+      --border: rgba(217, 70, 239, 0.28);
       --accent: linear-gradient(135deg, #f43f5e 0%, #d946ef 50%, #8b5cf6 100%);
       --accent-solid: #d946ef;
       --accent-text: #ffffff;
-      /* Насыщенное неоновое свечение */
-      --glow-1: rgba(217, 70, 239, 0.2);
-      --glow-2: rgba(162, 28, 175, 0.12);
-      --glow-3: rgba(99, 102, 241, 0.1);
+      --glow-1: rgba(217, 70, 239, 0.22);
+      --glow-2: rgba(162, 28, 175, 0.16);
+      --glow-3: rgba(99, 102, 241, 0.14);
       --grid-line: rgba(217, 70, 239, 0.05);
-      --node-color: 244, 63, 94;
+      --node-color: 232, 121, 249;
       --node-opacity: 0.55;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      padding: 48px 40px 80px;
+      padding: 40px 40px 90px;
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* Фоновые эффекты */
+    /* Фоновая сетка и неоновое свечение */
     .neural-bg {
       position: fixed;
       inset: 0;
@@ -87,7 +90,6 @@
       100% { transform: translate(-40px, 70px) scale(0.94); }
     }
 
-    /* Фоновый холст связей */
     #neural-canvas {
       position: fixed;
       inset: 0;
@@ -99,62 +101,40 @@
 
     .container { max-width: 1440px; margin: 0 auto; position: relative; z-index: 1; }
 
-    /* Верхняя шапка с логотипом */
+    /* Верхняя шапка с вашим полным логотипом в углу */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 52px;
+      margin-bottom: 44px;
     }
 
-    .logo-link {
-      display: flex;
+    .logo-banner-link {
+      display: inline-flex;
       align-items: center;
-      gap: 18px;
       text-decoration: none;
-      color: inherit;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #130421;
+      border: 1.5px solid rgba(217, 70, 239, 0.45);
+      box-shadow: 0 8px 30px rgba(217, 70, 239, 0.28);
     }
 
-    /* Контейнер для вашего фирменного логотипа ДГ */
-    .logo-container {
-      position: relative;
-      width: 58px;
-      height: 58px;
-      flex-shrink: 0;
+    .logo-banner-link:hover {
+      border-color: #f43f5e;
+      box-shadow: 0 10px 36px rgba(217, 70, 239, 0.45);
+      transform: translateY(-2px);
     }
 
-    .logo-image {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(217, 70, 239, 0.3);
-      border: 1.5px solid var(--accent-solid);
+    .logo-banner-img {
+      display: block;
+      height: 135px;
+      width: auto;
+      max-width: 100%;
+      object-fit: cover;
     }
 
-    .logo-text {
-      font-size: 1.05rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      line-height: 1.35;
-      font-weight: 850;
-      color: var(--text);
-    }
-
-    .logo-text span {
-      display: inline-block;
-      margin-top: 4px;
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      font-weight: 700;
-      color: #fff;
-      background: var(--accent);
-      padding: 3px 12px;
-      border-radius: 999px;
-      box-shadow: 0 2px 10px rgba(217, 70, 239, 0.25);
-    }
-
-    /* Заголовки */
+    /* Главный заголовок */
     header {
       margin-bottom: 36px;
       padding-bottom: 28px;
@@ -166,7 +146,6 @@
       font-weight: 300;
       letter-spacing: -0.03em;
       line-height: 1.08;
-      text-shadow: 0 2px 10px rgba(217, 70, 239, 0.05);
     }
 
     .hero-subtitle {
@@ -176,7 +155,7 @@
       letter-spacing: 0.04em;
     }
 
-    /* Навигация и переключение режимов */
+    /* Вкладки и переключение сетки */
     .subheader {
       display: flex;
       justify-content: space-between;
@@ -204,7 +183,6 @@
       font-size: 0.9rem;
       font-weight: 500;
       user-select: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
     .tab-item:hover {
@@ -217,7 +195,7 @@
       background: var(--accent);
       color: var(--accent-text);
       border-color: transparent;
-      box-shadow: 0 6px 16px rgba(217, 70, 239, 0.25);
+      box-shadow: 0 6px 16px rgba(217, 70, 239, 0.32);
     }
 
     .view-mode-toggle {
@@ -246,7 +224,7 @@
     .view-btn.active {
       background: var(--accent);
       color: var(--accent-text);
-      box-shadow: 0 2px 8px rgba(217, 70, 239, 0.2);
+      box-shadow: 0 2px 8px rgba(217, 70, 239, 0.25);
     }
 
     /* Галерея */
@@ -273,12 +251,12 @@
       overflow: hidden;
       border-radius: 16px;
       border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     }
 
     .card:hover .card-img-wrap {
       border-color: var(--accent-solid);
-      box-shadow: 0 10px 28px rgba(217, 70, 239, 0.2);
+      box-shadow: 0 10px 28px rgba(217, 70, 239, 0.25);
     }
 
     .card img {
@@ -296,14 +274,14 @@
       position: absolute;
       top: 12px;
       left: 12px;
-      background: rgba(30, 9, 44, 0.72);
+      background: rgba(24, 8, 38, 0.75);
       backdrop-filter: blur(8px);
       color: #fff;
       font-size: 0.72rem;
       font-weight: 500;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(217, 70, 239, 0.3);
       letter-spacing: 0.04em;
     }
 
@@ -323,7 +301,7 @@
     .lightbox {
       position: fixed;
       inset: 0;
-      background: rgba(14, 4, 23, 0.96);
+      background: rgba(10, 3, 18, 0.96);
       backdrop-filter: blur(14px);
       display: none;
       flex-direction: column;
@@ -333,31 +311,61 @@
       padding: 30px;
     }
     .lightbox.active { display: flex; }
-    .lightbox img { max-width: 90vw; max-height: 82vh; border-radius: 10px; object-fit: contain; box-shadow: 0 10px 45px rgba(217,70,239,0.25); border: 1px solid rgba(217,70,239,0.15); }
+    .lightbox img { max-width: 90vw; max-height: 82vh; border-radius: 10px; object-fit: contain; box-shadow: 0 10px 45px rgba(217,70,239,0.25); }
     .lightbox-caption { margin-top: 18px; font-size: 1.05rem; color: #f1f5f9; text-align: center; }
 
     .nav-btn {
       position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(217,70,239,0.15); color: #fff; border: 1px solid rgba(217,70,239,0.3);
+      background: rgba(217,70,239,0.18); color: #fff; border: 1px solid rgba(217,70,239,0.35);
       font-size: 1.6rem; width: 52px; height: 52px; border-radius: 50%; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
     }
-    .nav-btn:hover { background: rgba(217,70,239,0.3); box-shadow: 0 0 15px rgba(217,70,239,0.3); }
+    .nav-btn:hover { background: rgba(217,70,239,0.35); }
     .prev-btn { left: 25px; } .next-btn { right: 25px; }
     .close-btn { position: absolute; top: 25px; right: 30px; font-size: 2.2rem; color: #cbd5e1; cursor: pointer; background: none; border: none; }
 
-    .theme-toggle-fixed {
-      position: fixed; bottom: 25px; right: 25px;
-      background: var(--accent); color: var(--accent-text); border: none;
-      padding: 12px 22px; border-radius: 999px; cursor: pointer; font-weight: 600;
-      box-shadow: 0 8px 24px rgba(217, 70, 239, 0.35); z-index: 999;
-      letter-spacing: 0.04em;
+    /* Двойной переключатель темы (Дневной / Ночной) */
+    .theme-switcher {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: inline-flex;
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      padding: 5px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.25);
+      z-index: 999;
+      gap: 4px;
     }
 
+    .theme-mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .theme-mode-btn:hover {
+      color: var(--text);
+    }
+
+    .theme-mode-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(217, 70, 239, 0.4);
+    }
+
+    /* Кнопка наверх */
     .scroll-top-btn {
       position: fixed;
-      bottom: 82px;
-      right: 25px;
+      bottom: 84px;
+      right: 24px;
       width: 48px;
       height: 48px;
       border-radius: 50%;
@@ -379,10 +387,11 @@
     }
 
     .scroll-top-btn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-    .scroll-top-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(217, 70, 239, 0.45); }
+    .scroll-top-btn:hover { transform: translateY(-3px); }
 
     @media (max-width: 768px) {
-      body { padding: 28px 20px 70px; }
+      body { padding: 24px 18px 80px; }
+      .logo-banner-img { height: 95px; }
       .gallery.large { grid-template-columns: 1fr; }
     }
   </style>
@@ -397,16 +406,13 @@
 
   <div class="container">
     <div class="top-bar">
-      <a href="#" class="logo-link">
-        <div class="logo-container">
-          <!-- Здесь будет отображаться загруженный вами файл logo.png. В случае его отсутствия у вас будет красивый светящийся бокс -->
-          <img src="logo.png" onerror="this.style.display='none'" alt="ДГ" class="logo-image">
-          <div style="position: absolute; inset: 0; background: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; color: #fff; z-index: -1;">ДГ</div>
-        </div>
-        <div class="logo-text">
-          Дмитрий Гоголев<br>
-          <span>Нейрохудожник</span>
-        </div>
+      <a href="#" class="logo-banner-link" title="Дмитрий Гоголев — Нейрохудожник">
+        <img
+          src="Gemini_Generated_Image_di3q1zdi3q1zdi3q.jpg"
+          onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='logo.png';}"
+          alt="Дмитрий Гоголев — Нейрохудожник"
+          class="logo-banner-img"
+        >
       </a>
     </div>
 
@@ -428,7 +434,12 @@
   </div>
 
   <button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
-  <button class="theme-toggle-fixed" onclick="toggleTheme()" id="theme-btn">🌙 Ночной режим</button>
+
+  <!-- Понятный переключатель тем: какая кнопка нажата — тот режим и включён -->
+  <div class="theme-switcher">
+    <button class="theme-mode-btn" id="btn-light" onclick="setTheme('light')">☀️ Дневной</button>
+    <button class="theme-mode-btn active" id="btn-dark" onclick="setTheme('dark')">🌙 Ночной</button>
+  </div>
 
   <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
     <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -467,17 +478,21 @@
       localStorage.setItem('portfolio_grid', mode);
     }
 
-    function toggleTheme() {
+    function setTheme(mode) {
       const html = document.documentElement;
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      if (isDark) {
+      const btnLight = document.getElementById('btn-light');
+      const btnDark = document.getElementById('btn-dark');
+
+      if (mode === 'light') {
         html.removeAttribute('data-theme');
+        btnLight.classList.add('active');
+        btnDark.classList.remove('active');
         localStorage.setItem('portfolio_theme', 'light');
-        document.getElementById('theme-btn').textContent = '🌙 Ночной режим';
       } else {
         html.setAttribute('data-theme', 'dark');
+        btnDark.classList.add('active');
+        btnLight.classList.remove('active');
         localStorage.setItem('portfolio_theme', 'dark');
-        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
       }
     }
 
@@ -538,7 +553,6 @@
       if (e.key === 'ArrowRight') changeImage(1);
     });
 
-    // Анимация нейронных связей на фоне (с поддержкой динамического цвета)
     function initNeuralCanvas() {
       const canvas = document.getElementById('neural-canvas');
       const ctx = canvas.getContext('2d');
@@ -571,8 +585,8 @@
       function draw() {
         ctx.clearRect(0, 0, width, height);
         const style = getComputedStyle(document.documentElement);
-        const rgb = style.getPropertyValue('--node-color').trim();
-        const op = style.getPropertyValue('--node-opacity').trim() || '0.2';
+        const rgb = style.getPropertyValue('--node-color').trim() || '217, 70, 239';
+        const op = parseFloat(style.getPropertyValue('--node-opacity').trim() || '0.3');
 
         for (let i = 0; i < nodes.length; i++) {
           const n = nodes[i];
@@ -584,16 +598,14 @@
 
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${rgb}, ${parseFloat(op) * 1.5})`;
+          ctx.fillStyle = `rgba(${rgb}, ${Math.min(1, op * 1.4)})`;
           ctx.fill();
 
           for (let j = i + 1; j < nodes.length; j++) {
             const n2 = nodes[j];
-            const dx = n.x - n2.x;
-            const dy = n.y - n2.y;
-            const dist = Math.hypot(dx, dy);
+            const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
             if (dist < 160) {
-              const alpha = (1 - dist / 160) * parseFloat(op);
+              const alpha = (1 - dist / 160) * op;
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(n2.x, n2.y);
@@ -603,11 +615,9 @@
             }
           }
 
-          const mdx = n.x - mouse.x;
-          const mdy = n.y - mouse.y;
-          const mDist = Math.hypot(mdx, mdy);
+          const mDist = Math.hypot(n.x - mouse.x, n.y - mouse.y);
           if (mDist < 190) {
-            const alpha = (1 - mDist / 190) * (parseFloat(op) * 1.6);
+            const alpha = (1 - mDist / 190) * Math.min(1, op * 1.5);
             ctx.beginPath();
             ctx.moveTo(n.x, n.y);
             ctx.lineTo(mouse.x, mouse.y);
@@ -624,10 +634,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       initNeuralCanvas();
 
-      if (localStorage.getItem('portfolio_theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-btn').textContent = '☀️ Дневной режим';
-      }
+      const savedTheme = localStorage.getItem('portfolio_theme') || 'dark';
+      setTheme(savedTheme);
+
       const savedGrid = localStorage.getItem('portfolio_grid');
       if (savedGrid) setGrid(savedGrid);
 
@@ -639,7 +648,6 @@
           tabsContainer.innerHTML = '';
 
           const tabItems = [];
-
           const seenFolders = new Set();
           data.forEach(item => {
             if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
