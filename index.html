@@ -101,7 +101,7 @@
 
     .container { max-width: 1440px; margin: 0 auto; position: relative; z-index: 1; }
 
-    /* Верхняя шапка с логотипом БЕЗ рамки */
+    /* Верхняя шапка с логотипом без рамки */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -132,7 +132,7 @@
     }
 
     :root:not([data-theme="dark"]) .logo-banner-img {
-      filter: drop-shadow(0 2px 6px rgba(31, 9, 41, 0.55)) drop-shadow(0 4px 16px rgba(192, 38, 211, 0.35));
+      filter: drop-shadow(0 4px 14px rgba(192, 38, 211, 0.22));
     }
 
     .logo-banner-link:hover .logo-banner-img {
@@ -441,49 +441,37 @@
     let currentFilteredItems = [];
     let currentIndex = 0;
     let activeTab = null;
+    let logoDarkUrl = null;
+    let logoLightUrl = null;
 
-    // Автоматическое удаление тёмного фона у логотипа и обрезка пустых полей
-    function makeLogoTransparent() {
+    // Автоматическая генерация двух версий логотипа: для тёмного и для светлого фона
+    function buildDualLogos() {
       const img = document.getElementById('site-logo');
       if (!img) return;
 
       const process = () => {
         if (img.dataset.processed) return;
         try {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
           const w = img.naturalWidth;
           const h = img.naturalHeight;
           if (!w || !h) return;
 
-          canvas.width = w;
-          canvas.height = h;
-          ctx.drawImage(img, 0, 0);
+          const srcCanvas = document.createElement('canvas');
+          srcCanvas.width = w;
+          srcCanvas.height = h;
+          const srcCtx = srcCanvas.getContext('2d');
+          srcCtx.drawImage(img, 0, 0);
 
-          const imgData = ctx.getImageData(0, 0, w, h);
-          const d = imgData.data;
-
-          // Определяем цвет фона по угловому пикселю
-          const bgR = d[0], bgG = d[1], bgB = d[2];
+          const srcData = srcCtx.getImageData(0, 0, w, h).data;
+          const bgR = srcData[0], bgG = srcData[1], bgB = srcData[2];
 
           let minX = w, minY = h, maxX = 0, maxY = 0;
 
           for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
               const idx = (y * w + x) * 4;
-              const r = d[idx], g = d[idx + 1], b = d[idx + 2];
-
-              const dist = Math.hypot(r - bgR, g - bgG, b - bgB);
-              const maxChannel = Math.max(r, g, b);
-
-              if (dist < 28 && maxChannel < 65) {
-                d[idx + 3] = 0;
-              } else if (dist < 85) {
-                const alpha = Math.min(1, (dist - 28) / 57);
-                d[idx + 3] = Math.round(alpha * 255);
-              }
-
-              if (d[idx + 3] > 15) {
+              const dist = Math.hypot(srcData[idx] - bgR, srcData[idx + 1] - bgG, srcData[idx + 2] - bgB);
+              if (dist > 28) {
                 if (x < minX) minX = x;
                 if (x > maxX) maxX = x;
                 if (y < minY) minY = y;
@@ -492,9 +480,6 @@
             }
           }
 
-          ctx.putImageData(imgData, 0, 0);
-
-          // Аккуратно кадрируем лишние пустые края вокруг логотипа
           const pad = 16;
           minX = Math.max(0, minX - pad);
           minY = Math.max(0, minY - pad);
@@ -503,17 +488,156 @@
 
           const cropW = maxX - minX + 1;
           const cropH = maxY - minY + 1;
+          if (cropW <= 0 || cropH <= 0) return;
 
-          if (cropW > 0 && cropH > 0) {
-            const outCanvas = document.createElement('canvas');
-            outCanvas.width = cropW;
-            outCanvas.height = cropH;
-            outCanvas.getContext('2d').drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-            img.dataset.processed = '1';
-            img.src = outCanvas.toDataURL('image/png');
+          // Находим точную границу между эмблемой "ДГ" слева и текстом справа
+          let splitX = Math.floor(cropW * 0.50);
+          let minColEnergy = Infinity;
+          for (let cx = Math.floor(cropW * 0.45); cx <= Math.floor(cropW * 0.55); cx++) {
+            let energy = 0;
+            for (let cy = 0; cy < cropH; cy++) {
+              const idx = ((minY + cy) * w + (minX + cx)) * 4;
+              const d = Math.hypot(srcData[idx] - bgR, srcData[idx + 1] - bgG, srcData[idx + 2] - bgB);
+              if (d > 35) energy += d;
+            }
+            if (energy < minColEnergy) {
+              minColEnergy = energy;
+              splitX = cx;
+            }
           }
+
+          // Находим границу по вертикали между "ДМИТРИЙ ГОГОЛЕВ" и нижней строкой "НЕЙРОХУДОЖНИК"
+          let textMinY = cropH, textMaxY = 0;
+          for (let cy = 0; cy < cropH; cy++) {
+            for (let cx = splitX + 4; cx < cropW; cx++) {
+              const idx = ((minY + cy) * w + (minX + cx)) * 4;
+              const d = Math.hypot(srcData[idx] - bgR, srcData[idx + 1] - bgG, srcData[idx + 2] - bgB);
+              if (d > 45) {
+                if (cy < textMinY) textMinY = cy;
+                if (cy > textMaxY) textMaxY = cy;
+              }
+            }
+          }
+
+          let splitY = Math.floor(textMinY + (textMaxY - textMinY) * 0.72);
+          let minRowEnergy = Infinity;
+          const startY = Math.floor(textMinY + (textMaxY - textMinY) * 0.62);
+          const endY = Math.floor(textMinY + (textMaxY - textMinY) * 0.82);
+          for (let cy = startY; cy <= endY; cy++) {
+            let energy = 0;
+            for (let cx = splitX + 4; cx < cropW; cx++) {
+              const idx = ((minY + cy) * w + (minX + cx)) * 4;
+              const d = Math.hypot(srcData[idx] - bgR, srcData[idx + 1] - bgG, srcData[idx + 2] - bgB);
+              if (d > 40) energy += d;
+            }
+            if (energy < minRowEnergy) {
+              minRowEnergy = energy;
+              splitY = cy;
+            }
+          }
+
+          // 1. Собираем НОЧНУЮ версию (для тёмного фона)
+          const darkCanvas = document.createElement('canvas');
+          darkCanvas.width = cropW;
+          darkCanvas.height = cropH;
+          const darkCtx = darkCanvas.getContext('2d');
+          const darkImgData = darkCtx.createImageData(cropW, cropH);
+          const dDark = darkImgData.data;
+
+          // 2. Собираем ДНЕВНУЮ версию (контрастная для светлого фона)
+          const lightCanvas = document.createElement('canvas');
+          lightCanvas.width = cropW;
+          lightCanvas.height = cropH;
+          const lightCtx = lightCanvas.getContext('2d');
+          const lightImgData = lightCtx.createImageData(cropW, cropH);
+          const dLight = lightImgData.data;
+
+          const maxDiffPossible = 255 - Math.min(bgR, bgG, bgB);
+
+          for (let cy = 0; cy < cropH; cy++) {
+            for (let cx = 0; cx < cropW; cx++) {
+              const srcIdx = ((minY + cy) * w + (minX + cx)) * 4;
+              const dstIdx = (cy * cropW + cx) * 4;
+
+              const r = srcData[srcIdx];
+              const g = srcData[srcIdx + 1];
+              const b = srcData[srcIdx + 2];
+
+              const dist = Math.hypot(r - bgR, g - bgG, b - bgB);
+              const maxChannel = Math.max(r, g, b);
+
+              // --- НОЧНОЙ ЛОГОТИП ---
+              let alphaDark = 1;
+              if (dist < 28 && maxChannel < 65) {
+                alphaDark = 0;
+              } else if (dist < 85) {
+                alphaDark = Math.min(1, (dist - 28) / 57);
+              }
+              dDark[dstIdx] = r;
+              dDark[dstIdx + 1] = g;
+              dDark[dstIdx + 2] = b;
+              dDark[dstIdx + 3] = Math.round(alphaDark * 255);
+
+              // --- ДНЕВНОЙ ЛОГОТИП (ДЛЯ СВЕТЛОГО ФОНА) ---
+              const dR = Math.max(0, r - bgR);
+              const dG = Math.max(0, g - bgG);
+              const dB = Math.max(0, b - bgB);
+              const mag = Math.max(dR, dG, dB) / maxDiffPossible;
+
+              if (cx > splitX) {
+                // Правая часть: текст
+                const tAlpha = Math.min(1, Math.max(0, (mag - 0.14) / 0.46));
+                if (tAlpha > 0) {
+                  if (cy < splitY) {
+                    // "ДМИТРИЙ ГОГОЛЕВ" — глубокий тёмно-фиолетовый цвет
+                    dLight[dstIdx] = 33;
+                    dLight[dstIdx + 1] = 7;
+                    dLight[dstIdx + 2] = 54;
+                  } else {
+                    // "НЕЙРОХУДОЖНИК" — насыщенная тёмная фуксия
+                    dLight[dstIdx] = 168;
+                    dLight[dstIdx + 1] = 20;
+                    dLight[dstIdx + 2] = 144;
+                  }
+                  dLight[dstIdx + 3] = Math.round(Math.pow(tAlpha, 0.85) * 255);
+                }
+              } else {
+                // Левая часть: эмблема "ДГ", перо, нейросеть
+                if (mag > 0.08) {
+                  const rawA = Math.min(1, (mag - 0.08) / 0.72);
+                  const eAlpha = Math.pow(rawA, 1.15);
+
+                  // Очищаем цвет от тёмной подложки
+                  let fgR = Math.min(255, dR / Math.max(0.15, mag));
+                  let fgG = Math.min(255, dG / Math.max(0.15, mag));
+                  let fgB = Math.min(255, dB / Math.max(0.15, mag));
+
+                  // Делаем слишком светлые/белые блики насыщенно-пурпурными для контраста на белом фоне
+                  const whiteness = fgG / 255;
+                  fgR = Math.round(fgR * (1 - 0.22 * whiteness) + 145 * (0.22 * whiteness));
+                  fgG = Math.round(fgG * 0.28);
+                  fgB = Math.round(fgB * (1 - 0.15 * whiteness) + 175 * (0.15 * whiteness));
+
+                  dLight[dstIdx] = fgR;
+                  dLight[dstIdx + 1] = fgG;
+                  dLight[dstIdx + 2] = fgB;
+                  dLight[dstIdx + 3] = Math.round(eAlpha * 255);
+                }
+              }
+            }
+          }
+
+          darkCtx.putImageData(darkImgData, 0, 0);
+          lightCtx.putImageData(lightImgData, 0, 0);
+
+          logoDarkUrl = darkCanvas.toDataURL('image/png');
+          logoLightUrl = lightCanvas.toDataURL('image/png');
+          img.dataset.processed = '1';
+
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          img.src = isDark ? logoDarkUrl : logoLightUrl;
         } catch (e) {
-          // Если браузер открыт локально без сервера, оставляем как есть
+          // Оставляем исходное изображение при локальном запуске без сервера
         }
       };
 
@@ -550,14 +674,18 @@
     function applyTheme(mode) {
       const html = document.documentElement;
       const btn = document.getElementById('theme-btn');
+      const logoImg = document.getElementById('site-logo');
+
       if (mode === 'light') {
         html.removeAttribute('data-theme');
         btn.textContent = '☀️ Дневной режим';
         localStorage.setItem('portfolio_theme', 'light');
+        if (logoImg && logoLightUrl) logoImg.src = logoLightUrl;
       } else {
         html.setAttribute('data-theme', 'dark');
         btn.textContent = '🌙 Ночной режим';
         localStorage.setItem('portfolio_theme', 'dark');
+        if (logoImg && logoDarkUrl) logoImg.src = logoDarkUrl;
       }
     }
 
@@ -702,11 +830,11 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      makeLogoTransparent();
-      initNeuralCanvas();
-
       const savedTheme = localStorage.getItem('portfolio_theme') || 'dark';
       applyTheme(savedTheme);
+
+      buildDualLogos();
+      initNeuralCanvas();
 
       const savedGrid = localStorage.getItem('portfolio_grid');
       if (savedGrid) setGrid(savedGrid);
