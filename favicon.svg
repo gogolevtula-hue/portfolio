@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="50%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6d365"/>
+      <stop offset="50%" stop-color="#fda085"/>
+      <stop offset="100%" stop-color="#f6d365"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Square -->
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <rect x="16" y="16" width="480" height="480" rx="102" fill="none" stroke="url(#gold)" stroke-width="6" stroke-opacity="0.6"/>
+  
+  <!-- Neural Network Nodes & Connections -->
+  <g stroke="url(#neon)" stroke-width="5" opacity="0.45">
+    <line x1="110" y1="140" x2="256" y2="95"/>
+    <line x1="402" y1="140" x2="256" y2="95"/>
+    <line x1="110" y1="140" x2="175" y2="256"/>
+    <line x1="402" y1="140" x2="337" y2="256"/>
+    <line x1="175" y1="256" x2="256" y2="410"/>
+    <line x1="337" y1="256" x2="256" y2="410"/>
+  </g>
+  <circle cx="256" cy="95" r="10" fill="#00f2fe"/>
+  <circle cx="110" cy="140" r="10" fill="#00f2fe"/>
+  <circle cx="402" cy="140" r="10" fill="#00f2fe"/>
+  
+  <!-- Artist Palette & AI Spark / Brush -->
+  <path d="M256 115 C165 115 95 180 95 265 C95 348 165 405 235 405 C262 405 280 385 280 362 C280 348 272 338 272 325 C272 310 285 298 302 298 L335 298 C385 298 417 262 417 215 C417 155 345 115 256 115 Z" 
+        fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+  
+  <!-- Palette Color Dots (Glowing) -->
+  <circle cx="165" cy="225" r="20" fill="#ff0844"/>
+  <circle cx="215" cy="175" r="20" fill="#f6d365"/>
+  <circle cx="285" cy="175" r="20" fill="#00f2fe"/>
+  <circle cx="165" cy="295" r="20" fill="#b224ef"/>
+  
+  <!-- AI Sparkle Centerpiece & Brush Tip -->
+  <path d="M345 130 L360 175 L405 190 L360 205 L345 250 L330 205 L285 190 L330 175 Z" fill="#ffffff"/>
+  
+  <!-- Monogram DG (ДГ) Subtle Bottom Badge -->
+  <text x="256" y="468" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="url(#gold)" text-anchor="middle" letter-spacing="6">DG • AI</text>
+</svg>
