@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Дмитрий Гоголев — Нейрохудожник</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="shortcut icon" href="favicon.ico">
+  <title>Нейрохудожник</title>
   <style>
     /* Дневной режим (светлая тема) */
     :root {
@@ -27,7 +24,7 @@
       --node-opacity: 0.22;
     }
 
-    /* Ночной режим (тёмная киберпанк-фуксия тема) */
+    /* Ночной режим (тёмная киберпанк-фуксия тема — активна сразу при входе) */
     [data-theme="dark"] {
       --bg: #070210;
       --surface: rgba(24, 10, 44, 0.65);
@@ -53,6 +50,10 @@
       transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
@@ -60,7 +61,6 @@
       padding: 40px 40px 90px;
       min-height: 100vh;
       position: relative;
-      overflow-x: hidden;
     }
 
     /* Фоновая сетка и неоновое свечение */
@@ -335,8 +335,8 @@
     /* Одиночная компактная кнопка переключения темы */
     .theme-toggle-fixed {
       position: fixed;
-      bottom: 25px;
-      right: 25px;
+      bottom: 24px;
+      right: 24px;
       background: var(--accent);
       color: var(--accent-text);
       border: none;
@@ -348,18 +348,15 @@
       box-shadow: 0 8px 24px rgba(217, 70, 239, 0.35);
       z-index: 999;
       letter-spacing: 0.03em;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .theme-toggle-fixed:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(217, 70, 239, 0.5);
-    }
-
-    /* Кнопка наверх */
+    /* Кнопка наверх (исправлена для мобильных устройств) */
     .scroll-top-btn {
       position: fixed;
       bottom: 82px;
-      right: 25px;
+      right: 24px;
       width: 48px;
       height: 48px;
       border-radius: 50%;
@@ -376,17 +373,51 @@
       z-index: 999;
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
       transform: translateY(12px);
-      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
-    .scroll-top-btn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-    .scroll-top-btn:hover { transform: translateY(-3px); }
+    .scroll-top-btn.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .scroll-top-btn:active {
+      transform: scale(0.92);
+    }
+
+    @media (hover: hover) {
+      .theme-toggle-fixed:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(217, 70, 239, 0.5);
+      }
+      .scroll-top-btn:hover {
+        transform: translateY(-3px);
+      }
+    }
 
     @media (max-width: 768px) {
-      body { padding: 24px 18px 80px; }
+      body { padding: 24px 18px 85px; }
       .logo-banner-img { height: 100px; }
       .gallery.large { grid-template-columns: 1fr; }
+      .theme-toggle-fixed {
+        bottom: 18px;
+        right: 16px;
+        padding: 10px 18px;
+        font-size: 0.82rem;
+      }
+      .scroll-top-btn {
+        bottom: 70px;
+        right: 16px;
+        width: 46px;
+        height: 46px;
+      }
     }
   </style>
 </head>
@@ -400,12 +431,12 @@
 
   <div class="container">
     <div class="top-bar">
-      <a href="#" class="logo-banner-link" title="Дмитрий Гоголев — Нейрохудожник">
+      <a href="#" class="logo-banner-link" title="Нейрохудожник">
         <img
           id="site-logo"
           src="Gemini_Generated_Image_di3q1zdi3q1zdi3q.jpg"
           onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='logo.png';}"
-          alt="Дмитрий Гоголев — Нейрохудожник"
+          alt="Нейрохудожник"
           class="logo-banner-img"
         >
       </a>
@@ -413,7 +444,7 @@
 
     <header>
       <h1 class="hero-title">Свет. Чувство.<br>История.</h1>
-      <p class="hero-subtitle">Визуальные миры и образы, созданные нейрохудожником Дмитрием Гоголевым</p>
+      <p class="hero-subtitle">Визуальные миры и образы, созданные нейрохудожником</p>
     </header>
 
     <div class="subheader">
@@ -428,8 +459,8 @@
     <main class="gallery" id="gallery"></main>
   </div>
 
-  <button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
-  <button class="theme-toggle-fixed" id="theme-btn" onclick="toggleTheme()">🌙 Ночной режим</button>
+  <button type="button" class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
+  <button type="button" class="theme-toggle-fixed" id="theme-btn" onclick="toggleTheme()">🌙 Ночной режим</button>
 
   <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
     <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -493,7 +524,6 @@
           const cropH = maxY - minY + 1;
           if (cropW <= 0 || cropH <= 0) return;
 
-          // Находим точную границу между эмблемой "ДГ" слева и текстом справа
           let splitX = Math.floor(cropW * 0.50);
           let minColEnergy = Infinity;
           for (let cx = Math.floor(cropW * 0.45); cx <= Math.floor(cropW * 0.55); cx++) {
@@ -509,7 +539,6 @@
             }
           }
 
-          // Находим границу по вертикали между "ДМИТРИЙ ГОГОЛЕВ" и нижней строкой "НЕЙРОХУДОЖНИК"
           let textMinY = cropH, textMaxY = 0;
           for (let cy = 0; cy < cropH; cy++) {
             for (let cx = splitX + 4; cx < cropW; cx++) {
@@ -539,7 +568,6 @@
             }
           }
 
-          // 1. Собираем НОЧНУЮ версию (для тёмного фона)
           const darkCanvas = document.createElement('canvas');
           darkCanvas.width = cropW;
           darkCanvas.height = cropH;
@@ -547,7 +575,6 @@
           const darkImgData = darkCtx.createImageData(cropW, cropH);
           const dDark = darkImgData.data;
 
-          // 2. Собираем ДНЕВНУЮ версию (контрастная для светлого фона)
           const lightCanvas = document.createElement('canvas');
           lightCanvas.width = cropW;
           lightCanvas.height = cropH;
@@ -569,7 +596,6 @@
               const dist = Math.hypot(r - bgR, g - bgG, b - bgB);
               const maxChannel = Math.max(r, g, b);
 
-              // --- НОЧНОЙ ЛОГОТИП ---
               let alphaDark = 1;
               if (dist < 28 && maxChannel < 65) {
                 alphaDark = 0;
@@ -581,23 +607,19 @@
               dDark[dstIdx + 2] = b;
               dDark[dstIdx + 3] = Math.round(alphaDark * 255);
 
-              // --- ДНЕВНОЙ ЛОГОТИП (ДЛЯ СВЕТЛОГО ФОНА) ---
               const dR = Math.max(0, r - bgR);
               const dG = Math.max(0, g - bgG);
               const dB = Math.max(0, b - bgB);
               const mag = Math.max(dR, dG, dB) / maxDiffPossible;
 
               if (cx > splitX) {
-                // Правая часть: текст
                 const tAlpha = Math.min(1, Math.max(0, (mag - 0.14) / 0.46));
                 if (tAlpha > 0) {
                   if (cy < splitY) {
-                    // "ДМИТРИЙ ГОГОЛЕВ" — глубокий тёмно-фиолетовый цвет
                     dLight[dstIdx] = 33;
                     dLight[dstIdx + 1] = 7;
                     dLight[dstIdx + 2] = 54;
                   } else {
-                    // "НЕЙРОХУДОЖНИК" — насыщенная тёмная фуксия
                     dLight[dstIdx] = 168;
                     dLight[dstIdx + 1] = 20;
                     dLight[dstIdx + 2] = 144;
@@ -605,17 +627,14 @@
                   dLight[dstIdx + 3] = Math.round(Math.pow(tAlpha, 0.85) * 255);
                 }
               } else {
-                // Левая часть: эмблема "ДГ", перо, нейросеть
                 if (mag > 0.08) {
                   const rawA = Math.min(1, (mag - 0.08) / 0.72);
                   const eAlpha = Math.pow(rawA, 1.15);
 
-                  // Очищаем цвет от тёмной подложки
                   let fgR = Math.min(255, dR / Math.max(0.15, mag));
                   let fgG = Math.min(255, dG / Math.max(0.15, mag));
                   let fgB = Math.min(255, dB / Math.max(0.15, mag));
 
-                  // Делаем слишком светлые/белые блики насыщенно-пурпурными для контраста на белом фоне
                   const whiteness = fgG / 255;
                   fgR = Math.round(fgR * (1 - 0.22 * whiteness) + 145 * (0.22 * whiteness));
                   fgG = Math.round(fgG * 0.28);
@@ -651,18 +670,34 @@
       }
     }
 
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function getScrollTop() {
+      return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
     }
 
-    window.addEventListener('scroll', () => {
+    function updateScrollBtn() {
       const btn = document.getElementById('scroll-top-btn');
-      if (window.scrollY > 350) {
+      if (!btn) return;
+      if (getScrollTop() > 250) {
         btn.classList.add('visible');
       } else {
         btn.classList.remove('visible');
       }
-    });
+    }
+
+    function scrollToTop() {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    }
+
+    window.addEventListener('scroll', updateScrollBtn, { passive: true });
+    window.addEventListener('touchmove', updateScrollBtn, { passive: true });
 
     function setGrid(mode) {
       const gallery = document.getElementById('gallery');
@@ -682,12 +717,10 @@
       if (mode === 'light') {
         html.removeAttribute('data-theme');
         btn.textContent = '☀️ Дневной режим';
-        localStorage.setItem('portfolio_theme', 'light');
         if (logoImg && logoLightUrl) logoImg.src = logoLightUrl;
       } else {
         html.setAttribute('data-theme', 'dark');
         btn.textContent = '🌙 Ночной режим';
-        localStorage.setItem('portfolio_theme', 'dark');
         if (logoImg && logoDarkUrl) logoImg.src = logoDarkUrl;
       }
     }
@@ -833,11 +866,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('portfolio_theme') || 'dark';
-      applyTheme(savedTheme);
+      // Всегда открываем сайт сразу в ночной (тёмной) теме
+      localStorage.removeItem('portfolio_theme');
+      applyTheme('dark');
 
       buildDualLogos();
       initNeuralCanvas();
+      updateScrollBtn();
 
       const savedGrid = localStorage.getItem('portfolio_grid');
       if (savedGrid) setGrid(savedGrid);
