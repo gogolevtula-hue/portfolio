@@ -62,9 +62,11 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      padding: 40px 40px 90px;
+      padding: 40px 40px 100px;
       min-height: 100vh;
       position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Фоновая сетка и неоновое свечение */
@@ -106,7 +108,14 @@
       pointer-events: none;
     }
 
-    .container { max-width: 1440px; margin: 0 auto; position: relative; z-index: 1; }
+    .container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
 
     /* Верхняя шапка с логотипом без рамки */
     .top-bar {
@@ -309,6 +318,66 @@
       overflow: hidden;
     }
 
+    /* Блок статистики посещений внизу страницы */
+    .site-footer {
+      margin-top: 70px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .visitor-stats {
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      padding: 12px 26px;
+      border-radius: 999px;
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 26px rgba(217, 70, 239, 0.14);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .stat-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-solid);
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 6px rgba(217, 70, 239, 0.45));
+    }
+
+    .stat-label {
+      letter-spacing: 0.02em;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      background: var(--accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+    }
+
     /* Полноэкранный просмотр */
     .lightbox {
       position: fixed;
@@ -356,7 +425,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Кнопка наверх (исправлена для мобильных устройств) */
+    /* Кнопка наверх */
     .scroll-top-btn {
       position: fixed;
       bottom: 82px;
@@ -407,9 +476,15 @@
     }
 
     @media (max-width: 768px) {
-      body { padding: 24px 18px 85px; }
+      body { padding: 24px 18px 95px; }
       .logo-banner-img { height: 100px; }
       .gallery.large { grid-template-columns: 1fr; }
+      .visitor-stats {
+        gap: 12px 18px;
+        padding: 12px 18px;
+        border-radius: 20px;
+      }
+      .stat-divider { display: none; }
       .theme-toggle-fixed {
         bottom: 18px;
         right: 16px;
@@ -461,6 +536,33 @@
     </div>
 
     <main class="gallery" id="gallery"></main>
+
+    <!-- Счётчик посещений в самом низу страницы -->
+    <footer class="site-footer">
+      <div class="visitor-stats" aria-label="Статистика посещений сайта">
+        <div class="stat-item" title="Общее количество открытий сайта">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span class="stat-label">Всего заходов:</span>
+          <span class="stat-value" id="total-visits-count">...</span>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-item" title="Количество уникальных посетителей">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="stat-label">Уникальных посетителей:</span>
+          <span class="stat-value" id="unique-visitors-count">...</span>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <button type="button" class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
@@ -481,6 +583,82 @@
     let activeTab = null;
     let logoDarkUrl = null;
     let logoLightUrl = null;
+
+    // Плавная анимация цифр счётчика
+    function animateCounter(el, targetValue) {
+      if (!el) return;
+      const finalNum = Math.max(1, parseInt(targetValue, 10) || 1);
+      const duration = 650;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.max(1, Math.round(finalNum * eased));
+        el.textContent = current.toLocaleString('ru-RU');
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Инициализация двойного счётчика (Общие заходы + Уникальные посетители)
+    async function initVisitorCounters() {
+      const totalEl = document.getElementById('total-visits-count');
+      const uniqueEl = document.getElementById('unique-visitors-count');
+
+      const rawHost = (window.location.hostname || 'neurohudozhnik-site').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const namespace = `nh_portfolio_${rawHost}`;
+      const isAlreadyUnique = localStorage.getItem('nh_unique_user_v1') === '1';
+
+      // Локальный резервный расчёт (на случай открытия без интернета или блокировщика)
+      let localTotal = parseInt(localStorage.getItem('nh_local_total_v1') || '0', 10) + 1;
+      localStorage.setItem('nh_local_total_v1', String(localTotal));
+
+      let localUnique = parseInt(localStorage.getItem('nh_local_unique_v1') || '0', 10);
+      if (!isAlreadyUnique || localUnique < 1) {
+        localUnique += 1;
+        localStorage.setItem('nh_local_unique_v1', String(localUnique));
+      }
+
+      try {
+        // 1. Всегда увеличиваем счётчик общих заходов
+        const totalRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/total_visits/up`);
+        if (!totalRes.ok) throw new Error('Counter API error');
+        const totalData = await totalRes.json();
+        const totalCount = totalData.count || localTotal;
+
+        // 2. Уникальные посетители: увеличиваем только если человек зашёл впервые
+        let uniqueCount = localUnique;
+        if (!isAlreadyUnique) {
+          const uniqueUpRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/unique_visitors/up`);
+          if (uniqueUpRes.ok) {
+            const uniqueUpData = await uniqueUpRes.json();
+            uniqueCount = uniqueUpData.count || 1;
+            localStorage.setItem('nh_unique_user_v1', '1');
+          }
+        } else {
+          const uniqueGetRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/unique_visitors/`);
+          if (uniqueGetRes.ok) {
+            const uniqueGetData = await uniqueGetRes.json();
+            uniqueCount = uniqueGetData.count || 1;
+          }
+        }
+
+        // Гарантируем, что уникальных не больше общих заходов
+        if (uniqueCount > totalCount) uniqueCount = totalCount;
+
+        localStorage.setItem('nh_local_total_v1', String(totalCount));
+        localStorage.setItem('nh_local_unique_v1', String(uniqueCount));
+
+        animateCounter(totalEl, totalCount);
+        animateCounter(uniqueEl, uniqueCount);
+      } catch (e) {
+        // Если внешний API недоступен (например, локальный запуск файла), показываем сохранённые данные
+        localStorage.setItem('nh_unique_user_v1', '1');
+        animateCounter(totalEl, localTotal);
+        animateCounter(uniqueEl, Math.min(localTotal, localUnique));
+      }
+    }
 
     // Автоматическая генерация двух версий логотипа: для тёмного и для светлого фона
     function buildDualLogos() {
@@ -852,77 +1030,3 @@
               ctx.stroke();
             }
           }
-
-          const mDist = Math.hypot(n.x - mouse.x, n.y - mouse.y);
-          if (mDist < 190) {
-            const alpha = (1 - mDist / 190) * Math.min(1, op * 1.5);
-            ctx.beginPath();
-            ctx.moveTo(n.x, n.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-          }
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      // Всегда открываем сайт сразу в ночной (тёмной) теме
-      localStorage.removeItem('portfolio_theme');
-      applyTheme('dark');
-
-      buildDualLogos();
-      initNeuralCanvas();
-      updateScrollBtn();
-
-      const savedGrid = localStorage.getItem('portfolio_grid');
-      if (savedGrid) setGrid(savedGrid);
-
-      fetch('images.json?t=' + Date.now())
-        .then(res => res.json())
-        .then(data => {
-          allItems = data;
-          const tabsContainer = document.getElementById('unified-tabs');
-          tabsContainer.innerHTML = '';
-
-          const tabItems = [];
-          const seenFolders = new Set();
-          data.forEach(item => {
-            if (item.folder !== 'all' && !seenFolders.has(item.folder)) {
-              seenFolders.add(item.folder);
-              tabItems.push({ name: item.folderName, type: 'folder', value: item.folder });
-            }
-          });
-
-          tabItems.push({ name: 'Все работы', type: 'all', value: 'all' });
-
-          tabItems.forEach((tabObj, idx) => {
-            const tab = document.createElement('span');
-            tab.className = 'tab-item';
-            tab.textContent = tabObj.name;
-            tab.onclick = () => {
-              document.querySelectorAll('#unified-tabs .tab-item').forEach(el => el.classList.remove('active'));
-              tab.classList.add('active');
-              activeTab = tabObj;
-              applyFilter();
-            };
-            tabsContainer.appendChild(tab);
-
-            if (idx === 0) {
-              tab.classList.add('active');
-              activeTab = tabObj;
-            }
-          });
-
-          applyFilter();
-        })
-        .catch(() => {
-          document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
-        });
-    });
-  </script>
-</body>
-</html>
