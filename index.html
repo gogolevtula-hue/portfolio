@@ -309,6 +309,51 @@
       overflow: hidden;
     }
 
+    /* Блок двух счётчиков в самом низу страницы */
+    .site-footer {
+      margin-top: 64px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .visitor-stats {
+      display: inline-flex;
+      align-items: center;
+      gap: 22px;
+      padding: 11px 24px;
+      border-radius: 999px;
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 22px rgba(217, 70, 239, 0.14);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: var(--accent-solid);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+    }
+
     /* Полноэкранный просмотр */
     .lightbox {
       position: fixed;
@@ -410,6 +455,12 @@
       body { padding: 24px 18px 85px; }
       .logo-banner-img { height: 100px; }
       .gallery.large { grid-template-columns: 1fr; }
+      .visitor-stats {
+        gap: 10px 16px;
+        padding: 10px 16px;
+        border-radius: 18px;
+      }
+      .stat-divider { display: none; }
       .theme-toggle-fixed {
         bottom: 18px;
         right: 16px;
@@ -461,6 +512,20 @@
     </div>
 
     <main class="gallery" id="gallery"></main>
+
+    <footer class="site-footer">
+      <div class="visitor-stats">
+        <div class="stat-item">
+          <span>👁 Всего заходов:</span>
+          <span class="stat-value" id="total-visits-count">1</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span>👤 Новых посетителей:</span>
+          <span class="stat-value" id="unique-visitors-count">1</span>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <button type="button" class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTop()" title="Наверх" aria-label="Наверх">&#8593;</button>
@@ -869,6 +934,58 @@
       draw();
     }
 
+    // Изолированный подсчёт общих заходов и новых посетителей
+    function initVisitorCounters() {
+      try {
+        const totalEl = document.getElementById('total-visits-count');
+        const uniqueEl = document.getElementById('unique-visitors-count');
+        if (!totalEl || !uniqueEl) return;
+
+        const isReturning = localStorage.getItem('nh_visited_before') === '1';
+        let localTotal = parseInt(localStorage.getItem('nh_total_visits') || '0', 10) + 1;
+        let localUnique = parseInt(localStorage.getItem('nh_unique_visitors') || '0', 10);
+
+        if (!isReturning || localUnique < 1) {
+          localUnique += 1;
+          localStorage.setItem('nh_unique_visitors', String(localUnique));
+        }
+        localStorage.setItem('nh_total_visits', String(localTotal));
+
+        totalEl.textContent = localTotal.toLocaleString('ru-RU');
+        uniqueEl.textContent = localUnique.toLocaleString('ru-RU');
+
+        const hostKey = (window.location.hostname || 'neurohudozhnik').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const ns = 'nh_site_' + hostKey;
+
+        fetch('https://api.counterapi.dev/v1/' + ns + '/visits/up')
+          .then(r => r.json())
+          .then(d => {
+            if (d && typeof d.count === 'number') {
+              totalEl.textContent = d.count.toLocaleString('ru-RU');
+              localStorage.setItem('nh_total_visits', String(d.count));
+            }
+          })
+          .catch(() => {});
+
+        const uniqueUrl = isReturning
+          ? 'https://api.counterapi.dev/v1/' + ns + '/unique/'
+          : 'https://api.counterapi.dev/v1/' + ns + '/unique/up';
+
+        fetch(uniqueUrl)
+          .then(r => r.json())
+          .then(d => {
+            if (d && typeof d.count === 'number') {
+              uniqueEl.textContent = d.count.toLocaleString('ru-RU');
+              localStorage.setItem('nh_unique_visitors', String(d.count));
+              localStorage.setItem('nh_visited_before', '1');
+            }
+          })
+          .catch(() => {
+            localStorage.setItem('nh_visited_before', '1');
+          });
+      } catch (e) {}
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       // Всегда открываем сайт сразу в ночной (тёмной) теме
       localStorage.removeItem('portfolio_theme');
@@ -922,6 +1039,8 @@
         .catch(() => {
           document.getElementById('gallery').innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);padding:40px;">Изображения скоро появятся...</p>';
         });
+
+      initVisitorCounters();
     });
   </script>
 </body>
