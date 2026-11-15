@@ -322,8 +322,8 @@
     .visitor-stats {
       display: inline-flex;
       align-items: center;
-      gap: 22px;
-      padding: 11px 24px;
+      gap: 24px;
+      padding: 12px 26px;
       border-radius: 999px;
       background: var(--surface);
       backdrop-filter: blur(12px);
@@ -336,16 +336,25 @@
     .stat-item {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       font-size: 0.88rem;
       color: var(--text-muted);
+    }
+
+    .stat-icon {
+      width: 17px;
+      height: 17px;
+      color: var(--accent-solid);
+      flex-shrink: 0;
     }
 
     .stat-value {
       font-weight: 700;
       font-size: 0.96rem;
-      color: var(--accent-solid);
+      color: var(--text);
       font-variant-numeric: tabular-nums;
+      min-width: 18px;
+      text-align: center;
     }
 
     .stat-divider {
@@ -457,8 +466,8 @@
       .gallery.large { grid-template-columns: 1fr; }
       .visitor-stats {
         gap: 10px 16px;
-        padding: 10px 16px;
-        border-radius: 18px;
+        padding: 10px 18px;
+        border-radius: 20px;
       }
       .stat-divider { display: none; }
       .theme-toggle-fixed {
@@ -513,16 +522,29 @@
 
     <main class="gallery" id="gallery"></main>
 
+    <!-- Два счётчика посещений (Общие заходы + Уникальные по IP) -->
     <footer class="site-footer">
-      <div class="visitor-stats">
-        <div class="stat-item">
-          <span>👁 Всего заходов:</span>
-          <span class="stat-value" id="total-visits-count">1</span>
+      <div class="visitor-stats" id="visitor-stats-box">
+        <div class="stat-item" title="Общее количество заходов на сайт">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Всего заходов:</span>
+          <span class="stat-value" id="total-visits-count">...</span>
         </div>
+
         <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span>👤 Новых посетителей:</span>
-          <span class="stat-value" id="unique-visitors-count">1</span>
+
+        <div class="stat-item" title="Уникальные посетители по IP-адресу (повторные заходы с одного IP не увеличивают счётчик)">
+          <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Уникальных посетителей:</span>
+          <span class="stat-value" id="unique-visitors-count">...</span>
         </div>
       </div>
     </footer>
@@ -934,56 +956,120 @@
       draw();
     }
 
-    // Изолированный подсчёт общих заходов и новых посетителей
-    function initVisitorCounters() {
+    // Определение реального IP-адреса посетителя (с резервными источниками)
+    async function getVisitorIP() {
+      const endpoints = [
+        { url: 'https://api.ipify.org?format=json', parse: d => d && d.ip },
+        { url: 'https://ipwho.is/', parse: d => d && d.ip },
+        { url: 'https://api.db-ip.com/v2/free/self', parse: d => d && d.ipAddress }
+      ];
+
+      for (const ep of endpoints) {
+        try {
+          const res = await fetch(ep.url, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            const ip = ep.parse(data);
+            if (ip && typeof ip === 'string') return ip.trim();
+          }
+        } catch (e) {}
+      }
+
       try {
-        const totalEl = document.getElementById('total-visits-count');
-        const uniqueEl = document.getElementById('unique-visitors-count');
-        if (!totalEl || !uniqueEl) return;
-
-        const isReturning = localStorage.getItem('nh_visited_before') === '1';
-        let localTotal = parseInt(localStorage.getItem('nh_total_visits') || '0', 10) + 1;
-        let localUnique = parseInt(localStorage.getItem('nh_unique_visitors') || '0', 10);
-
-        if (!isReturning || localUnique < 1) {
-          localUnique += 1;
-          localStorage.setItem('nh_unique_visitors', String(localUnique));
+        const res = await fetch('https://www.cloudflare.com/cdn-cgi/trace', { cache: 'no-store' });
+        if (res.ok) {
+          const text = await res.text();
+          const match = text.match(/^ip=(.+)$/m);
+          if (match && match[1]) return match[1].trim();
         }
-        localStorage.setItem('nh_total_visits', String(localTotal));
-
-        totalEl.textContent = localTotal.toLocaleString('ru-RU');
-        uniqueEl.textContent = localUnique.toLocaleString('ru-RU');
-
-        const hostKey = (window.location.hostname || 'neurohudozhnik').replace(/[^a-zA-Z0-9_-]/g, '_');
-        const ns = 'nh_site_' + hostKey;
-
-        fetch('https://api.counterapi.dev/v1/' + ns + '/visits/up')
-          .then(r => r.json())
-          .then(d => {
-            if (d && typeof d.count === 'number') {
-              totalEl.textContent = d.count.toLocaleString('ru-RU');
-              localStorage.setItem('nh_total_visits', String(d.count));
-            }
-          })
-          .catch(() => {});
-
-        const uniqueUrl = isReturning
-          ? 'https://api.counterapi.dev/v1/' + ns + '/unique/'
-          : 'https://api.counterapi.dev/v1/' + ns + '/unique/up';
-
-        fetch(uniqueUrl)
-          .then(r => r.json())
-          .then(d => {
-            if (d && typeof d.count === 'number') {
-              uniqueEl.textContent = d.count.toLocaleString('ru-RU');
-              localStorage.setItem('nh_unique_visitors', String(d.count));
-              localStorage.setItem('nh_visited_before', '1');
-            }
-          })
-          .catch(() => {
-            localStorage.setItem('nh_visited_before', '1');
-          });
       } catch (e) {}
+
+      return 'local_device';
+    }
+
+    // Подсчёт: 1) Всего заходов (+1 каждый вход) и 2) Уникальных посетителей строго по IP-адресу
+    async function initVisitorCounters() {
+      const totalEl = document.getElementById('total-visits-count');
+      const uniqueEl = document.getElementById('unique-visitors-count');
+      if (!totalEl || !uniqueEl) return;
+
+      const ip = await getVisitorIP();
+      const ipKey = 'ip_' + ip.replace(/[^a-zA-Z0-9]/g, '_');
+
+      // Локальный резерв с привязкой к IP-адресу
+      let seenIps = {};
+      try {
+        seenIps = JSON.parse(localStorage.getItem('nh_ip_registry_v2') || '{}');
+      } catch (e) {
+        seenIps = {};
+      }
+
+      const isNewIpLocally = !seenIps[ipKey];
+      seenIps[ipKey] = (seenIps[ipKey] || 0) + 1;
+
+      let localTotal = parseInt(localStorage.getItem('nh_total_v2') || '0', 10) + 1;
+      let localUnique = Object.keys(seenIps).length;
+
+      try {
+        localStorage.setItem('nh_ip_registry_v2', JSON.stringify(seenIps));
+        localStorage.setItem('nh_total_v2', String(localTotal));
+      } catch (e) {}
+
+      const hostKey = (window.location.hostname || 'neurohudozhnik_main').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const ns = 'nh_ip_stats_v2_' + hostKey;
+
+      try {
+        // 1. Увеличиваем общий счётчик всех заходов на сайт
+        const totalRes = await fetch('https://api.counterapi.dev/v1/' + ns + '/total_visits/up');
+        if (!totalRes.ok) throw new Error('API error');
+        const totalData = await totalRes.json();
+        const totalCount = (totalData && typeof totalData.count === 'number') ? totalData.count : localTotal;
+
+        // 2. Проверяем в облачной базе, сколько раз заходили именно с этого IP-адреса
+        const ipRes = await fetch('https://api.counterapi.dev/v1/' + ns + '/' + ipKey + '/up');
+        const ipData = ipRes.ok ? await ipRes.json() : { count: isNewIpLocally ? 1 : 2 };
+        const isFirstVisitFromThisIP = (ipData && ipData.count === 1);
+
+        let uniqueCount = localUnique;
+
+        if (isFirstVisitFromThisIP) {
+          // С этого IP зашли впервые — увеличиваем счётчик уникальных посетителей на +1
+          const uniqueUpRes = await fetch('https://api.counterapi.dev/v1/' + ns + '/unique_ips/up');
+          if (uniqueUpRes.ok) {
+            const uniqueUpData = await uniqueUpRes.json();
+            if (uniqueUpData && typeof uniqueUpData.count === 'number') {
+              uniqueCount = uniqueUpData.count;
+            }
+          }
+        } else {
+          // С этого IP уже заходили раньше — НЕ увеличиваем счётчик, а только читаем текущее значение
+          const uniqueGetRes = await fetch('https://api.counterapi.dev/v1/' + ns + '/unique_ips');
+          if (uniqueGetRes.ok) {
+            const uniqueGetData = await uniqueGetRes.json();
+            if (uniqueGetData && typeof uniqueGetData.count === 'number') {
+              uniqueCount = uniqueGetData.count;
+            }
+          } else {
+            // Если глобальный ключ ещё не был инициализирован, создаём его со значением 1
+            const initRes = await fetch('https://api.counterapi.dev/v1/' + ns + '/unique_ips/up');
+            if (initRes.ok) {
+              const initData = await initRes.json();
+              if (initData && typeof initData.count === 'number') {
+                uniqueCount = initData.count;
+              }
+            }
+          }
+        }
+
+        if (uniqueCount > totalCount) uniqueCount = totalCount;
+
+        totalEl.textContent = totalCount.toLocaleString('ru-RU');
+        uniqueEl.textContent = uniqueCount.toLocaleString('ru-RU');
+      } catch (e) {
+        // Если сайт открыт без интернета, отображаем точный локальный подсчёт по IP
+        totalEl.textContent = localTotal.toLocaleString('ru-RU');
+        uniqueEl.textContent = Math.min(localTotal, localUnique).toLocaleString('ru-RU');
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
